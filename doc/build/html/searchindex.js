@@ -1,1 +1,0 @@
-Search.setIndex({envversion:46,filenames:["index"],objects:{},objnames:{},objtypes:{},terms:{content:0,index:0,modul:0,page:0,search:0},titles:["Welcome to Zumo Segway&#8217;s documentation!"],titleterms:{document:0,indic:0,segwai:0,tabl:0,welcom:0,zumo:0}})
