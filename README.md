@@ -5,20 +5,21 @@ implementation, of Segway behavior on a *zumo32u4* board.
 
 ## Documentation
 
-The documentation is available at *TBD*
+The documentation is available
+[here](http://zumosegway.readthedocs.io/en/latest/)
 
 ### Build the documentation
 
-The documentation of this project was developed using [Sphinx](). To build the
-documentation we recommend to create a ```Python``` virtual environment
-first by running;
+The documentation of this project was developed using
+[Sphinx](http://www.sphinx-doc.org/en/stable/). To build the documentation we
+recommend to create a ```Python``` virtual environment first by running;
 
 ```
 cd <project-root>
 virtualenv venv
 ```
 
-Install all the dependencies for building the documentation by runningl
+Install all the dependencies for building the documentation by running;
 
 ```
 cd <project-root>/doc
@@ -64,8 +65,9 @@ board.
 
 # Project Management
 
-To manage the development of this project we use (Taiga)[http://taiga.io/].
-Click (here)[] to see our project in Taiga.
+To manage the development of this project we use [Taiga](http://taiga.io/).
+Click [here](https://tree.taiga.io/project/pjcuadra-segway-system-on-zumo-32u4/)
+to see our project in Taiga.
 
 # Issues tracking
 
