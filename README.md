@@ -40,7 +40,7 @@ make html
 ```
 
 Finallay you can open the ```index.html``` file at
-**<project-root>/doc/build/html/index.html** to navigate the documentation.
+```<project-root>/doc/build/html/index.html``` to navigate the documentation.
 
 ## Developer Guide
 
