@@ -4,3 +4,4 @@
 .gcc-flags.json
 lib/autogen
 venv
+doc/build
