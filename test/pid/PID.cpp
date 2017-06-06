@@ -36,6 +36,7 @@ void pid_p_only(void) {
 
   pid_controller.connect_input(&in);
 
+  // Try proportinal with different values
   for(in = 0; in < it; in++) {
     pid_controller.simulate();
     TEST_ASSERT_EQUAL(in * gain, pid_controller.get_output());
@@ -51,6 +52,7 @@ void pid_i_only(void) {
 
   pid_controller.connect_input(&in);
 
+  // Try integration by comparing with accumulating
   for(in = 0; in < it; in++) {
     pid_controller.simulate();
     acc += in;
@@ -69,6 +71,7 @@ void pid_i_only_limit(void) {
 
   pid_controller.connect_input(&in);
 
+  // Try integration by comparing with accumulating within bounds
   for(in = 0; in < it; in++) {
     pid_controller.simulate();
     acc += in;
@@ -90,6 +93,7 @@ void pid_d_only(void) {
 
   pid_controller.connect_input(&in);
 
+  // Test differential
   for(in = inc; in < it; in+= inc) {
     pid_controller.simulate();
     TEST_ASSERT_EQUAL(inc * gain, pid_controller.get_output());
@@ -124,6 +128,7 @@ void pid_all(void) {
   d = 1 * gain;
   TEST_ASSERT_EQUAL(p + i + d, pid_controller.get_output());
 
+  // Test integration with constant input (d/dt = 0)
   for(int o = in; o < it; o++) {
     d = 0;
     i += gain;
@@ -131,6 +136,7 @@ void pid_all(void) {
     TEST_ASSERT_EQUAL(p + i + d, pid_controller.get_output());
   }
 
+  // Change input to -1 (d/dt = -2)
   in = -1;
   pid_controller.simulate();
   p = -1 * gain;
@@ -138,6 +144,7 @@ void pid_all(void) {
   d = -2 * gain;
   TEST_ASSERT_EQUAL(p + i + d, pid_controller.get_output());
 
+  // Test integration with constant input (d/dt = 0) till integral is 0;
   for(int o = in; o < (it - 2); o++) {
     d = 0;
     i -= gain;
@@ -145,14 +152,17 @@ void pid_all(void) {
     TEST_ASSERT_EQUAL(p + i + d, pid_controller.get_output());
   }
 
+  // Test the integral component to be zero
   TEST_ASSERT_EQUAL(0, i);
 
+  // Change the input to 0 (d/dt = 1)
   in = 0;
   pid_controller.simulate();
   p = 0;
   d = 1 * gain;
   TEST_ASSERT_EQUAL(p + i + d, pid_controller.get_output());
 
+  // Input stays in zero value
   pid_controller.simulate();
   p = 0;
   d = 0;

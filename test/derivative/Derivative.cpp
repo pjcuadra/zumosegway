@@ -47,6 +47,7 @@ void derivative_component(void) {
   diff.simulate();
   TEST_ASSERT_EQUAL(diff.get_output(), 4);
 
+  // Change input signal and simulate
   in = 7;
   TEST_ASSERT_EQUAL(diff.get_input(), 7);
   TEST_ASSERT_EQUAL(diff.get_output(), 4);

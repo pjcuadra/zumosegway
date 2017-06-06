@@ -54,11 +54,15 @@ void limit_component(void) {
   lim_2.simulate();
   lim_3.simulate();
 
+  // Test only possitive or negative saturation
+  in = 0;
+
   TEST_ASSERT_EQUAL(lim_0.get_output(), 0);
   TEST_ASSERT_EQUAL(lim_1.get_output(), 0);
   TEST_ASSERT_EQUAL(lim_2.get_output(), 3);
   TEST_ASSERT_EQUAL(lim_3.get_output(), -1);
 
+  // Test Floating point
   in = 0.4;
 
   lim_0.simulate();
@@ -71,7 +75,7 @@ void limit_component(void) {
   TEST_ASSERT_EQUAL(lim_2.get_output(), 3);
   TEST_ASSERT_EQUAL(lim_3.get_output(), -1);
 
-
+  // Test positive floating point saturation
   in = 0.6;
 
   lim_0.simulate();
@@ -84,6 +88,7 @@ void limit_component(void) {
   TEST_ASSERT_EQUAL(lim_2.get_output(), 3);
   TEST_ASSERT_EQUAL(lim_3.get_output(), -1);
 
+  // Test positive Integer saturation
   in = 3.1;
 
   lim_0.simulate();
@@ -96,7 +101,7 @@ void limit_component(void) {
   TEST_ASSERT_EQUAL(lim_2.get_output(), 3.1);
   TEST_ASSERT_EQUAL(lim_3.get_output(), -1);
 
-
+  // Test only positive Integer saturation
   in = 5;
 
   lim_0.simulate();
@@ -109,7 +114,7 @@ void limit_component(void) {
   TEST_ASSERT_EQUAL(lim_2.get_output(), 4);
   TEST_ASSERT_EQUAL(lim_3.get_output(), -1);
 
-
+  // Test negative floating point saturation
   in = -0.6;
 
   lim_0.simulate();
@@ -122,6 +127,7 @@ void limit_component(void) {
   TEST_ASSERT_EQUAL(lim_2.get_output(), 3);
   TEST_ASSERT_EQUAL(lim_3.get_output(), -1);
 
+  // Test negative floating point
   in = -1.5;
 
   lim_0.simulate();
@@ -134,6 +140,7 @@ void limit_component(void) {
   TEST_ASSERT_EQUAL(lim_2.get_output(), 3);
   TEST_ASSERT_EQUAL(lim_3.get_output(), -1.5);
 
+  // Test negative saturation
   in = -2.1;
 
   lim_0.simulate();
@@ -146,6 +153,8 @@ void limit_component(void) {
   TEST_ASSERT_EQUAL(lim_2.get_output(), 3);
   TEST_ASSERT_EQUAL(lim_3.get_output(), -2.1);
 
+
+  // Test only negative saturation
   in = -3.1;
 
   lim_0.simulate();
