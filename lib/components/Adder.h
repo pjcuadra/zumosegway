@@ -10,13 +10,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License. */
- 
-#include <Arduino.h>
+#ifndef ADDER_H_
+#define ADDER_H_
 
-void setup() {
-  // TODO: TBD
-}
+#include<Component.h>
 
-void loop() {
-  //TODO: TBD
-}
+class Adder: public Component<2, 1> {
+public:
+  inline float simulate() {
+    return write_output(get_input(0) + get_input(1));
+  }
+};
+
+#endif
