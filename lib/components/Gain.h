@@ -10,13 +10,37 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License. */
- 
-#include <Arduino.h>
 
-void setup() {
-  // TODO: TBD
-}
+#ifndef GAIN_H_
+#define GAIN_H_
 
-void loop() {
-  //TODO: TBD
-}
+#include<Component.h>
+
+/**
+ * Gain Component
+ */
+class Gain: public Component<1, 1> {
+public:
+
+  /**
+   * Constructor
+   * @param gain_k gain
+   */
+  Gain(float gain_k) {
+    this->gain_k = gain_k;
+  }
+
+  /**
+   * Simulate the circuit component
+   */
+  inline float simulate() {
+    return write_output(gain_k * get_input());
+  }
+
+private:
+  /** Gain */
+  float gain_k;
+
+};
+
+#endif

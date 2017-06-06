@@ -12,6 +12,11 @@ Contents:
    :maxdepth: 2
 
 
+* item 1
+* item 2
+
+.. note::
+  This is still WIP
 
 Indices and tables
 ==================
