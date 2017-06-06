@@ -16,16 +16,24 @@
 
 #include<Component.h>
 
+/**
+ * Derivative Component
+ */
 class Derivative: public Component<1, 1> {
 public:
-  float stored = 0;
-
+  /**
+   * Simulate the circuit component
+   */
   inline float simulate() {
     float input = get_input();
     float tmp = input - stored;
     stored = input;
     return write_output(tmp);
   }
+  
+private:
+  /** Internal store variable */
+  float stored = 0;
 
 };
 

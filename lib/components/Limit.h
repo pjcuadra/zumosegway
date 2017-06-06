@@ -15,26 +15,48 @@
 #define Limit_H_
 
 #ifdef ARDUINO
-#include <Arduino.h>
+#include <Arduino.h> // Needed for the constrain function
 #endif
 
 #include<Component.h>
 
+/**
+ * Limit Component
+ */
 class Limit: public Component<1, 1> {
 public:
-  float upper;
-  float lower;
-
-
+  /**
+   * Constructor
+   * @param lower lower limit
+   * @param upper upper limit
+   */
   Limit(float lower, float upper) {
     this->upper = upper;
     this->lower = lower;
   }
 
+  /**
+   * Simulate the circuit component
+   */
   inline float simulate() {
-    return write_output(constrain(get_input(), lower, upper));
+    #ifdef ARDUINO
+      return write_output(constrain(get_input(), lower, upper));
+    #else
+      if (get_input() < lower) {
+        return write_output(lower);
+      }
+
+      if (get_input() > upper) {
+        return write_output(upper);
+      }
+    #endif
   }
 
+private:
+  /** Upper limit */
+  float upper;
+  /** Lower limit */
+  float lower;
 };
 
 #endif

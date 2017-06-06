@@ -17,20 +17,35 @@
 #include<Component.h>
 #include<Limit.h>
 
+/**
+ * Integral Component
+ */
 class Integral: public Component<1, 1> {
 public:
-  float stored = 0;
-  Limit lim;
 
+  /**
+   * Constructor
+   * @param lower lower saturation limit
+   * @param upper upper saturation limit
+   */
   Integral(float lower, float upper) : lim(lower, upper){
     lim.connect_input(&stored);
     lim.connect_output(&stored);
   }
 
+  /**
+   * Simulate the circuit component
+   */
   inline float simulate() {
     this->stored += get_input();
     return write_output(lim.simulate());
   }
+
+private:
+  /** Internal store value */
+  float stored = 0;
+  /** Limit circuit component */
+  Limit lim;
 };
 
 #endif

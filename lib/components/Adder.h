@@ -15,8 +15,14 @@
 
 #include<Component.h>
 
+/**
+ * Adder Component
+ */
 class Adder: public Component<2, 1> {
 public:
+  /**
+   * Simulate the circuit component
+   */
   inline float simulate() {
     return write_output(get_input(0) + get_input(1));
   }

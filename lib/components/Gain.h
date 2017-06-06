@@ -16,18 +16,29 @@
 
 #include<Component.h>
 
+/**
+ * Gain Component
+ */
 class Gain: public Component<1, 1> {
 public:
 
+  /**
+   * Constructor
+   * @param gain_k gain
+   */
   Gain(float gain_k) {
     this->gain_k = gain_k;
   }
 
+  /**
+   * Simulate the circuit component
+   */
   inline float simulate() {
     return write_output(gain_k * get_input());
   }
 
 private:
+  /** Gain */
   float gain_k;
 
 };

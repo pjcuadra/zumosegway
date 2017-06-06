@@ -21,16 +21,18 @@
 #include<Limit.h>
 #include<Derivative.h>
 
+/**
+ * PID Component
+ */
 class PID: public Component<1, 1> {
 public:
-  Gain P;
-  Gain I;
-  Gain D;
-  Adder ad_0;
-  Adder ad_1;
-  Integral integral;
-  Derivative diff;
 
+  /**
+   * Simulate the circuit component
+   * @param gain_p gain for the proportinal component
+   * @param gain_i gain for the integral component
+   * @param gain_d gain for the differential component
+   */
   PID(float gain_p, float gain_i, float gain_d) :
     P(gain_p),
     I(gain_i),
@@ -39,6 +41,14 @@ public:
     build_circuit();
   }
 
+  /**
+   * Simulate the circuit component
+   * @param gain_p gain for the proportinal component
+   * @param gain_i gain for the integral component
+   * @param gain_d gain for the differential component
+   * @param integral_lower lower saturation limit for the integral
+   * @param integral_upper upper saturation limit for the integral
+   */
   PID(float gain_p, float gain_i, float gain_d, float integral_lower, float integral_upper) :
     P(gain_p),
     I(gain_i),
@@ -47,6 +57,11 @@ public:
     build_circuit();
   }
 
+  /**
+   * Connect to an indexed input of the component
+   * @param index index of the input
+   * @param signal pointer to the variable of the input
+   */
   inline void connect_input(int index, float *signal){
     integral.connect_input(index, signal);
     diff.connect_input(index, signal);
@@ -54,39 +69,80 @@ public:
     Component<1, 1>::connect_input(index, signal);
   }
 
+  /**
+   * Connect to the first input of the component
+   * @param signal pointer to the variable of the input
+   */
   inline void connect_input(float *signal){
     connect_input(0, signal);
   }
 
+  /**
+   * Connect to an indexed output of the component
+   * @param index index of the output
+   * @param signal pointer to the variable of the output
+   */
   inline void connect_output(int index, float *signal){
     ad_1.connect_output(index, signal);
     Component<1, 1>::connect_output(index, signal);
 
   }
 
+  /**
+   * Connect to an indexed output of the component
+   * @param index index of the output
+   * @param signal pointer to the variable of the output
+   */
   inline void connect_output(float *signal){
     connect_output(0, signal);
   }
 
-
+  /**
+   * Simulate the circuit component
+   */
   inline float simulate() {
+    // Simulation must be done as the signal propagates
 
+    // Integral
     integral.simulate();
+    // Differential
     diff.simulate();
 
+    // Gains
     P.simulate();
     I.simulate();
     D.simulate();
 
+    // Adders
     ad_0.simulate();
     ad_1.simulate();
 
+    // Debug
     set_probe(integral.get_output());
 
+    // Return the updated value
     return ad_1.get_output();
   }
 
 private:
+  /** Gain component for proportinal behaviour */
+  Gain P;
+  /** Gain component for integral behaviour */
+  Gain I;
+  /** Gain component for differential behaviour */
+  Gain D;
+  /** Adder component */
+  Adder ad_0;
+  /** Adder component */
+  Adder ad_1;
+  /** Intergral component */
+  Integral integral;
+  /** Differential component */
+  Derivative diff;
+
+  /**
+   * Interconnect all subblocks/subcomponents
+   */
   void build_circuit() {
     // Connect to the integral and derivate
     integral.connect_input(get_input_signal());
