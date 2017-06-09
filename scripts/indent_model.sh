@@ -1,1 +1,1 @@
-xmllint --format $1 --output $1
+xmllint --format "$1" --output "$1"
