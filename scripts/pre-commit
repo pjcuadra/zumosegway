@@ -11,12 +11,10 @@
 project_root=$(git rev-parse --show-toplevel)
 model_path="${project_root}/model"
 
-for model in `git diff --cached --name-only | grep xcos`
-do
-    echo "Indenting model at: ${project_root}/${model}"
-    ${project_root}/scripts/indent_model.sh ${project_root}/${model}
-    git add ${project_root}/${model}
-
+git diff --cached --name-only | grep xcos | while read -r model ; do
+    echo "Indenting model at: $project_root/$model"
+    $project_root/scripts/indent_model.sh "$project_root/$model"
+    git add "$project_root/$model"
 done
 
 # Redirect output to stderr.
