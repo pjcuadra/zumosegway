@@ -18,13 +18,20 @@
 /**
  * Adder Component
  */
-class Adder: public Component<2, 1> {
+class Adder: public Component {
 public:
+  /** Input port 0 */
+  Port in_0;
+  /** Input port 1 */
+  Port in_1;
+  /** Output port */
+  Port out;
+
   /**
    * Simulate the circuit component
    */
   inline float simulate() {
-    return write_output(get_input(0) + get_input(1));
+    return out.write(in_0.read() + in_1.read());
   }
 };
 

@@ -20,8 +20,12 @@
 /**
  * Integral Component
  */
-class Integral: public Component<1, 1> {
+class Integral: public Component {
 public:
+  /** Input port */
+  Port in;
+  /** Output port */
+  Port out;
 
   /**
    * Constructor
@@ -29,21 +33,25 @@ public:
    * @param upper upper saturation limit
    */
   Integral(float lower, float upper) : lim(lower, upper){
-    lim.connect_input(&stored);
-    lim.connect_output(&stored);
+    lim.in = stored;
+    lim.out = s_out;
   }
 
   /**
    * Simulate the circuit component
    */
   inline float simulate() {
-    this->stored += get_input();
-    return write_output(lim.simulate());
+    this->stored += in.read();
+    lim.simulate();
+    this->stored = s_out.read();
+    return out.write(s_out.read());
   }
 
 private:
-  /** Internal store value */
-  float stored = 0;
+  /** Internal store signal */
+  Signal stored;
+  /** Output limit signal */
+  Signal s_out;
   /** Limit circuit component */
   Limit lim;
 };

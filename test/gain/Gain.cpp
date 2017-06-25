@@ -20,19 +20,19 @@
 #include <unity.h>
 #include <Gain.h>
 
-float in = 0;
-float out_0 = 0;
-float out_1 = 0;
+Signal in;
+Signal out_0;
+Signal out_1;
 Gain gain_0(5);
 Gain gain_1(-1);
 
 void setUp(void) {
   // set stuff up here
-  gain_0.connect_output(&out_0);
-  gain_1.connect_output(&out_1);
+  gain_0.out = out_0;
+  gain_1.out = out_1;
 
-  gain_0.connect_input(&in);
-  gain_1.connect_input(&in);
+  gain_0.in = in;
+  gain_1.in = in;
 
 }
 
@@ -42,50 +42,50 @@ void setUp(void) {
 
 void gain_component(void) {
   // Test that inputs/outputs are connected
-  TEST_ASSERT_EQUAL(gain_0.get_output(), 0);
-  TEST_ASSERT_EQUAL(gain_0.get_input(), 0);
-  TEST_ASSERT_EQUAL(gain_1.get_output(), 0);
-  TEST_ASSERT_EQUAL(gain_1.get_input(), 0);
+  TEST_ASSERT_EQUAL(gain_0.out.read(), 0);
+  TEST_ASSERT_EQUAL(gain_0.in.read(), 0);
+  TEST_ASSERT_EQUAL(gain_1.out.read(), 0);
+  TEST_ASSERT_EQUAL(gain_1.in.read(), 0);
 
   gain_0.simulate();
   gain_1.simulate();
 
-  TEST_ASSERT_EQUAL(gain_0.get_output(), 0);
-  TEST_ASSERT_EQUAL(gain_0.get_input(), 0);
-  TEST_ASSERT_EQUAL(gain_1.get_output(), 0);
-  TEST_ASSERT_EQUAL(gain_1.get_input(), 0);
+  TEST_ASSERT_EQUAL(gain_0.out.read(), 0);
+  TEST_ASSERT_EQUAL(gain_0.in.read(), 0);
+  TEST_ASSERT_EQUAL(gain_1.out.read(), 0);
+  TEST_ASSERT_EQUAL(gain_1.in.read(), 0);
 
   // Change input signal and simulate
   in = 1;
 
-  TEST_ASSERT_EQUAL(gain_0.get_output(), 0);
-  TEST_ASSERT_EQUAL(gain_0.get_input(), 1);
-  TEST_ASSERT_EQUAL(gain_1.get_output(), 0);
-  TEST_ASSERT_EQUAL(gain_1.get_input(), 1);
+  TEST_ASSERT_EQUAL(gain_0.out.read(), 0);
+  TEST_ASSERT_EQUAL(gain_0.in.read(), 1);
+  TEST_ASSERT_EQUAL(gain_1.out.read(), 0);
+  TEST_ASSERT_EQUAL(gain_1.in.read(), 1);
 
   gain_0.simulate();
   gain_1.simulate();
 
-  TEST_ASSERT_EQUAL(gain_0.get_output(), 5);
-  TEST_ASSERT_EQUAL(gain_0.get_input(), 1);
-  TEST_ASSERT_EQUAL(gain_1.get_output(), -1);
-  TEST_ASSERT_EQUAL(gain_1.get_input(), 1);
+  TEST_ASSERT_EQUAL(gain_0.out.read(), 5);
+  TEST_ASSERT_EQUAL(gain_0.in.read(), 1);
+  TEST_ASSERT_EQUAL(gain_1.out.read(), -1);
+  TEST_ASSERT_EQUAL(gain_1.in.read(), 1);
 
   // Change input signal and simulate
   in = 2;
 
-  TEST_ASSERT_EQUAL(gain_0.get_output(), 5);
-  TEST_ASSERT_EQUAL(gain_0.get_input(), 2);
-  TEST_ASSERT_EQUAL(gain_1.get_output(), -1);
-  TEST_ASSERT_EQUAL(gain_1.get_input(), 2);
+  TEST_ASSERT_EQUAL(gain_0.out.read(), 5);
+  TEST_ASSERT_EQUAL(gain_0.in.read(), 2);
+  TEST_ASSERT_EQUAL(gain_1.out.read(), -1);
+  TEST_ASSERT_EQUAL(gain_1.in.read(), 2);
 
   gain_0.simulate();
   gain_1.simulate();
 
-  TEST_ASSERT_EQUAL(gain_0.get_output(), 10);
-  TEST_ASSERT_EQUAL(gain_0.get_input(), 2);
-  TEST_ASSERT_EQUAL(gain_1.get_output(), -2);
-  TEST_ASSERT_EQUAL(gain_1.get_input(), 2);
+  TEST_ASSERT_EQUAL(gain_0.out.read(), 10);
+  TEST_ASSERT_EQUAL(gain_0.in.read(), 2);
+  TEST_ASSERT_EQUAL(gain_1.out.read(), -2);
+  TEST_ASSERT_EQUAL(gain_1.in.read(), 2);
 
 }
 
