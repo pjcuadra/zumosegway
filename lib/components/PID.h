@@ -24,8 +24,33 @@
 /**
  * PID Component
  */
-class PID: public Component<1, 1> {
+class PID: public Component {
 public:
+  /** Input port */
+  Port in;
+  /** Output port */
+  Port out;
+
+  /** Input Signal */
+  Signal s_in;
+
+  /** Integrator output signal  */
+  Signal s_i_out;
+  /** Derivator output signal  */
+  Signal s_d_out;
+
+  /** Proportinal gain output signal  */
+  Signal s_g_p_out;
+  /** Integral gain output signal  */
+  Signal s_g_i_out;
+  /** Derivate gain output signal  */
+  Signal s_g_d_out;
+
+  /** Intermediate adder output signal  */
+  Signal s_add_tmp;
+
+  /** Output Signal */
+  Signal s_out;
 
   /**
    * Simulate the circuit component
@@ -58,49 +83,12 @@ public:
   }
 
   /**
-   * Connect to an indexed input of the component
-   * @param index index of the input
-   * @param signal pointer to the variable of the input
-   */
-  inline void connect_input(int index, float *signal){
-    integral.connect_input(index, signal);
-    diff.connect_input(index, signal);
-    P.connect_input(index, signal);
-    Component<1, 1>::connect_input(index, signal);
-  }
-
-  /**
-   * Connect to the first input of the component
-   * @param signal pointer to the variable of the input
-   */
-  inline void connect_input(float *signal){
-    connect_input(0, signal);
-  }
-
-  /**
-   * Connect to an indexed output of the component
-   * @param index index of the output
-   * @param signal pointer to the variable of the output
-   */
-  inline void connect_output(int index, float *signal){
-    ad_1.connect_output(index, signal);
-    Component<1, 1>::connect_output(index, signal);
-
-  }
-
-  /**
-   * Connect to an indexed output of the component
-   * @param index index of the output
-   * @param signal pointer to the variable of the output
-   */
-  inline void connect_output(float *signal){
-    connect_output(0, signal);
-  }
-
-  /**
    * Simulate the circuit component
    */
   inline float simulate() {
+
+    s_in = in.read();
+
     // Simulation must be done as the signal propagates
 
     // Integral
@@ -110,18 +98,15 @@ public:
 
     // Gains
     P.simulate();
-    I.simulate();
     D.simulate();
+    I.simulate();
 
     // Adders
     ad_0.simulate();
     ad_1.simulate();
 
-    // Debug
-    set_probe(integral.get_output());
-
     // Return the updated value
-    return ad_1.get_output();
+    return out.write(s_out.read());
   }
 
 private:
@@ -145,23 +130,30 @@ private:
    */
   void build_circuit() {
     // Connect to the integral and derivate
-    integral.connect_input(get_input_signal());
-    diff.connect_input(get_input_signal());
+    integral.in = s_in;
+    integral.out = s_i_out;
+
+    diff.in = s_in;
+    diff.out = s_d_out;
 
     // Connect the gain of every component
-    P.connect_input(get_input_signal());
-    I.connect_input(integral.get_output_signal());
-    D.connect_input(diff.get_output_signal());
+    P.in = s_in;
+    P.out = s_g_p_out;
 
-    // Connect both adders together
-    ad_1.connect_input(ad_0.get_output_signal());
+    I.in = s_i_out;
+    I.out = s_g_i_out;
+
+    D.in = s_d_out;
+    D.out = s_g_d_out;
 
     // Add all together
-    ad_0.connect_input(0, P.get_output_signal());
-    ad_0.connect_input(1, I.get_output_signal());
-    ad_1.connect_input(1, D.get_output_signal());
+    ad_0.in_0 = s_g_p_out;
+    ad_0.in_1 = s_g_i_out;
+    ad_0.out = s_add_tmp;
 
-    ad_1.connect_output(get_output_signal());
+    ad_1.in_0 = s_add_tmp;
+    ad_1.in_1 = s_g_d_out;
+    ad_1.out = s_out;
   }
 
 };

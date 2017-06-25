@@ -20,10 +20,10 @@
 #include <unity.h>
 #include <Integral.h>
 
-float in_0 = 0;
-float in_1 = 0;
-float out_0 = 0;
-float out_1 = 0;
+Signal in_0;
+Signal in_1;
+Signal out_0;
+Signal out_1;
 const float delta = 0.0001;
 const int integer_limits = 5;
 const float floating_limits = 1;
@@ -33,10 +33,10 @@ Integral integf(-floating_limits, floating_limits);
 
 void setUp(void) {
   // set stuff up here
-  integ.connect_output(&out_0);
-  integ.connect_input(&in_0);
-  integf.connect_output(&out_1);
-  integf.connect_input(&in_1);
+  integ.out = out_0;
+  integ.in = in_0;
+  integf.out = out_1;
+  integf.in = in_1;
 
 }
 
@@ -46,97 +46,97 @@ void setUp(void) {
 
 void integrate_integer(void) {
   // Test that inputs/outputs are connected
-  TEST_ASSERT_EQUAL_FLOAT(integ.get_output(), 0);
-  TEST_ASSERT_EQUAL_FLOAT(integ.get_input(), 0);
+  TEST_ASSERT_EQUAL_FLOAT(integ.out.read(), 0);
+  TEST_ASSERT_EQUAL_FLOAT(integ.in.read(), 0);
 
   integ.simulate();
 
-  TEST_ASSERT_EQUAL_FLOAT(integ.get_output(), 0);
-  TEST_ASSERT_EQUAL_FLOAT(integ.get_input(), in_0);
+  TEST_ASSERT_EQUAL_FLOAT(integ.out.read(), 0);
+  TEST_ASSERT_EQUAL_FLOAT(integ.in.read(), in_0.read());
 
   // Change input signal and simulate
   in_0 = 1;
-  TEST_ASSERT_EQUAL_FLOAT(integ.get_output(), 0);
-  TEST_ASSERT_EQUAL_FLOAT(integ.get_input(), in_0);
+  TEST_ASSERT_EQUAL_FLOAT(integ.out.read(), 0);
+  TEST_ASSERT_EQUAL_FLOAT(integ.in.read(), in_0.read());
 
   // Intergate for integer_limits simulation times
   for (int i = 1; i <= integer_limits; i++) {
     integ.simulate();
-    TEST_ASSERT_EQUAL_FLOAT(integ.get_output(), i);
-    TEST_ASSERT_EQUAL_FLOAT(integ.get_input(), in_0);
+    TEST_ASSERT_EQUAL_FLOAT(integ.out.read(), i);
+    TEST_ASSERT_EQUAL_FLOAT(integ.in.read(), in_0.read());
   }
 
   // Try to integrate above the upper limit
   for (int i = 0; i < integer_limits; i++) {
     integ.simulate();
-    TEST_ASSERT_EQUAL_FLOAT(integ.get_output(), integer_limits);
-    TEST_ASSERT_EQUAL_FLOAT(integ.get_input(), in_0);
+    TEST_ASSERT_EQUAL_FLOAT(integ.out.read(), integer_limits);
+    TEST_ASSERT_EQUAL_FLOAT(integ.in.read(), in_0.read());
   }
 
   in_0 = -1;
-  TEST_ASSERT_EQUAL_FLOAT(integ.get_output(), integer_limits);
-  TEST_ASSERT_EQUAL_FLOAT(integ.get_input(), in_0);
+  TEST_ASSERT_EQUAL_FLOAT(integ.out.read(), integer_limits);
+  TEST_ASSERT_EQUAL_FLOAT(integ.in.read(), in_0.read());
 
   for (int i = integer_limits; i >= -integer_limits; i--) {
-    TEST_ASSERT_EQUAL_FLOAT(integ.get_output(), i);
-    TEST_ASSERT_EQUAL_FLOAT(integ.get_input(), in_0);
+    TEST_ASSERT_EQUAL_FLOAT(integ.in.read(), in_0.read());
+    TEST_ASSERT_EQUAL_FLOAT(integ.out.read(), i);
     integ.simulate();
   }
 
   // Try to integrate below the lower limit
   for (int i = 0; i < integer_limits; i++) {
     integ.simulate();
-    TEST_ASSERT_EQUAL_FLOAT(integ.get_output(), -integer_limits);
-    TEST_ASSERT_EQUAL_FLOAT(integ.get_input(), in_0);
+    TEST_ASSERT_EQUAL_FLOAT(integ.out.read(), -integer_limits);
+    TEST_ASSERT_EQUAL_FLOAT(integ.in.read(), in_0.read());
   }
 }
 
 void integrate_floating(void) {
   in_1 = 0;
   // Test that inputs/outputs are connected
-  TEST_ASSERT_EQUAL_FLOAT(integf.get_output(), 0);
-  TEST_ASSERT_EQUAL_FLOAT(integf.get_input(), in_1);
+  TEST_ASSERT_EQUAL_FLOAT(integf.out.read(), 0);
+  TEST_ASSERT_EQUAL_FLOAT(integf.in.read(), in_1.read());
 
   integf.simulate();
 
-  TEST_ASSERT_EQUAL_FLOAT(integf.get_output(), 0);
-  TEST_ASSERT_EQUAL_FLOAT(integf.get_input(), in_1);
+  TEST_ASSERT_EQUAL_FLOAT(integf.out.read(), 0);
+  TEST_ASSERT_EQUAL_FLOAT(integf.in.read(), in_1.read());
 
   // Change input signal and simulate
   in_1 = 0.1;
-  TEST_ASSERT_EQUAL_FLOAT(integf.get_output(), 0);
-  TEST_ASSERT_EQUAL_FLOAT(integf.get_input(), in_1);
+  TEST_ASSERT_EQUAL_FLOAT(integf.out.read(), 0);
+  TEST_ASSERT_EQUAL_FLOAT(integf.in.read(), in_1.read());
 
   // Intergate until saturation
-  for (float i = in_1; i <= floating_limits; i += in_1) {
+  for (float i = in_1.read(); i <= floating_limits; i += in_1.read()) {
     integf.simulate();
-    TEST_ASSERT_EQUAL_FLOAT(integf.get_output(), i);
-    TEST_ASSERT_EQUAL_FLOAT(integf.get_input(), in_1);
+    TEST_ASSERT_EQUAL_FLOAT(integf.out.read(), i);
+    TEST_ASSERT_EQUAL_FLOAT(integf.in.read(), in_1.read());
   }
 
   // Try to integrate above the upper limit
-  for (float i = 0; i < floating_limits; i += in_1) {
+  for (float i = 0; i < floating_limits; i += in_1.read()) {
     integf.simulate();
-    TEST_ASSERT_EQUAL_FLOAT(integf.get_output(), floating_limits);
-    TEST_ASSERT_EQUAL_FLOAT(integf.get_input(), in_1);
+    TEST_ASSERT_EQUAL_FLOAT(integf.out.read(), floating_limits);
+    TEST_ASSERT_EQUAL_FLOAT(integf.in.read(), in_1.read());
   }
 
   in_1 = -1;
-  TEST_ASSERT_EQUAL_FLOAT(integf.get_output(), floating_limits);
-  TEST_ASSERT_EQUAL_FLOAT(integf.get_input(), in_1);
+  TEST_ASSERT_EQUAL_FLOAT(integf.out.read(), floating_limits);
+  TEST_ASSERT_EQUAL_FLOAT(integf.in.read(), in_1.read());
 
   // Intergate until saturation
-  for (float i = floating_limits; i >= -floating_limits; i += in_1) {
-    TEST_ASSERT_EQUAL_FLOAT(integf.get_output(), i);
-    TEST_ASSERT_EQUAL_FLOAT(integf.get_input(), in_1);
+  for (float i = floating_limits; i >= -floating_limits; i += in_1.read()) {
+    TEST_ASSERT_EQUAL_FLOAT(integf.out.read(), i);
+    TEST_ASSERT_EQUAL_FLOAT(integf.in.read(), in_1.read());
     integf.simulate();
   }
 
   // Try to integrate below the lower limit
-  for (float i = 0; i > -floating_limits; i += in_1) {
+  for (float i = 0; i > -floating_limits; i += in_1.read()) {
     integf.simulate();
-    TEST_ASSERT_EQUAL_FLOAT(integf.get_output(), -floating_limits);
-    TEST_ASSERT_EQUAL_FLOAT(integf.get_input(), in_1);
+    TEST_ASSERT_EQUAL_FLOAT(integf.out.read(), -floating_limits);
+    TEST_ASSERT_EQUAL_FLOAT(integf.in.read(), in_1.read());
   }
 }
 

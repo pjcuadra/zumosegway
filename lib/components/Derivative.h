@@ -19,18 +19,20 @@
 /**
  * Derivative Component
  */
-class Derivative: public Component<1, 1> {
+class Derivative: public Component {
 public:
+  Port in;
+  Port out;
   /**
    * Simulate the circuit component
    */
   inline float simulate() {
-    float input = get_input();
+    float input = in.read();
     float tmp = input - stored;
     stored = input;
-    return write_output(tmp);
+    return out.write(tmp);
   }
-  
+
 private:
   /** Internal store variable */
   float stored = 0;

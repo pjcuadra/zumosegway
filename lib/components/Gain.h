@@ -19,8 +19,12 @@
 /**
  * Gain Component
  */
-class Gain: public Component<1, 1> {
+class Gain: public Component {
 public:
+  /** Input port */
+  Port in;
+  /** Output port */
+  Port out;
 
   /**
    * Constructor
@@ -34,7 +38,7 @@ public:
    * Simulate the circuit component
    */
   inline float simulate() {
-    return write_output(gain_k * get_input());
+    return out.write(gain_k * in.read());
   }
 
 private:

@@ -19,44 +19,44 @@
 
 #ifdef UNIT_TEST
 
-float in_0 = 0;
-float in_1 = 0;
-float out = 0;
+Signal in_0;
+Signal in_1;
+Signal out;
 Adder adder;
 
 void setUp(void) {
   // set stuff up here
-  adder.connect_output(&out);
-  adder.connect_input(0, &in_0);
-  adder.connect_input(1, &in_1);
+  adder.out = out;
+  adder.in_0 = in_0;
+  adder.in_1 = in_1;
 }
 
 void adder_component(void) {
   // Test that inputs/outputs are connected
-  TEST_ASSERT_EQUAL(adder.get_output(), 0);
-  TEST_ASSERT_EQUAL(adder.get_input(0), 0);
-  TEST_ASSERT_EQUAL(adder.get_input(1), 0);
+  TEST_ASSERT_EQUAL(adder.out.read(), 0);
+  TEST_ASSERT_EQUAL(adder.in_0.read(), 0);
+  TEST_ASSERT_EQUAL(adder.in_1.read(), 0);
 
   // Change input signal and simulate
   in_0 = 4;
-  TEST_ASSERT_EQUAL(adder.get_input(0), 4);
-  TEST_ASSERT_EQUAL(adder.get_input(1), 0);
-  TEST_ASSERT_EQUAL(adder.get_output(), 0);
+  TEST_ASSERT_EQUAL(adder.in_0.read(), 4);
+  TEST_ASSERT_EQUAL(adder.in_1.read(), 0);
+  TEST_ASSERT_EQUAL(adder.out.read(), 0);
   adder.simulate();
-  TEST_ASSERT_EQUAL(adder.get_output(), 4);
+  TEST_ASSERT_EQUAL(adder.out.read(), 4);
 
   // Change the other input signal and simulate
   in_1 = 3;
-  TEST_ASSERT_EQUAL(adder.get_input(0), 4);
-  TEST_ASSERT_EQUAL(adder.get_input(1), 3);
-  TEST_ASSERT_EQUAL(adder.get_output(), 4);
+  TEST_ASSERT_EQUAL(adder.in_0.read(), 4);
+  TEST_ASSERT_EQUAL(adder.in_1.read(), 3);
+  TEST_ASSERT_EQUAL(adder.out.read(), 4);
   adder.simulate();
-  TEST_ASSERT_EQUAL(adder.get_output(), 7);
+  TEST_ASSERT_EQUAL(adder.out.read(), 7);
 
   // Simulate again to verify output isn't accumulating
 
   adder.simulate();
-  TEST_ASSERT_EQUAL(adder.get_output(), 7);
+  TEST_ASSERT_EQUAL(adder.out.read(), 7);
 
 }
 

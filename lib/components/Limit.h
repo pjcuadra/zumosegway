@@ -19,12 +19,18 @@
 #endif
 
 #include<Component.h>
+#include<Port.h>
 
 /**
  * Limit Component
  */
-class Limit: public Component<1, 1> {
+class Limit: public Component {
 public:
+  /** Input port */
+  Port in;
+  /** Output port */
+  Port out;
+
   /**
    * Constructor
    * @param lower lower limit
@@ -40,14 +46,14 @@ public:
    */
   inline float simulate() {
     #ifdef ARDUINO
-      return write_output(constrain(get_input(), lower, upper));
+      return out.write(constrain(in.read(), lower, upper));
     #else
-      if (get_input() < lower) {
-        return write_output(lower);
+      if (in.read() < lower) {
+        return out.write(lower);
       }
 
-      if (get_input() > upper) {
-        return write_output(upper);
+      if (in.read() > upper) {
+        return out.write(upper);
       }
     #endif
   }

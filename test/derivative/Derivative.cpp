@@ -20,14 +20,14 @@
 #include <unity.h>
 #include <Derivative.h>
 
-float in = 0;
-float out = 0;
+Signal in;
+Signal out;
 Derivative diff;
 
 void setUp(void) {
   // set stuff up here
-  diff.connect_output(&out);
-  diff.connect_input(&in);
+  diff.out = out;
+  diff.in = in;
 
 }
 
@@ -37,27 +37,27 @@ void setUp(void) {
 
 void derivative_component(void) {
   // Test that inputs/outputs are connected
-  TEST_ASSERT_EQUAL(diff.get_output(), 0);
-  TEST_ASSERT_EQUAL(diff.get_input(), 0);
+  TEST_ASSERT_EQUAL(diff.out.read(), 0);
+  TEST_ASSERT_EQUAL(diff.in.read(), 0);
 
   // Change input signal and simulate
   in = 4;
-  TEST_ASSERT_EQUAL(diff.get_input(), 4);
-  TEST_ASSERT_EQUAL(diff.get_output(), 0);
+  TEST_ASSERT_EQUAL(diff.in.read(), 4);
+  TEST_ASSERT_EQUAL(diff.out.read(), 0);
   diff.simulate();
-  TEST_ASSERT_EQUAL(diff.get_output(), 4);
+  TEST_ASSERT_EQUAL(diff.out.read(), 4);
 
   // Change input signal and simulate
   in = 7;
-  TEST_ASSERT_EQUAL(diff.get_input(), 7);
-  TEST_ASSERT_EQUAL(diff.get_output(), 4);
+  TEST_ASSERT_EQUAL(diff.in.read(), 7);
+  TEST_ASSERT_EQUAL(diff.out.read(), 4);
   diff.simulate();
-  TEST_ASSERT_EQUAL(diff.get_output(), 3);
+  TEST_ASSERT_EQUAL(diff.out.read(), 3);
 
-  TEST_ASSERT_EQUAL(diff.get_input(), 7);
-  TEST_ASSERT_EQUAL(diff.get_output(), 3);
+  TEST_ASSERT_EQUAL(diff.in.read(), 7);
+  TEST_ASSERT_EQUAL(diff.out.read(), 3);
   diff.simulate();
-  TEST_ASSERT_EQUAL(diff.get_output(), 0);
+  TEST_ASSERT_EQUAL(diff.out.read(), 0);
 
 }
 

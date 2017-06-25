@@ -20,7 +20,8 @@
 #include <unity.h>
 #include <Limit.h>
 
-float in = 0;
+Signal in;
+Signal out[4];
 Limit lim_0(-0.5, 0.5);
 Limit lim_1(-2, 2);
 Limit lim_2(3, 4);
@@ -28,10 +29,14 @@ Limit lim_3(-3, -1);
 
 void setUp(void) {
   // set stuff up here
-  lim_0.connect_input(&in);
-  lim_1.connect_input(&in);
-  lim_2.connect_input(&in);
-  lim_3.connect_input(&in);
+  lim_0.in = in;
+  lim_0.out = out[0];
+  lim_1.in = in;
+  lim_1.out = out[1];
+  lim_2.in = in;
+  lim_2.out = out[2];
+  lim_3.in = in;
+  lim_3.out = out[3];
 }
 
 // void tearDown(void) {
@@ -40,14 +45,14 @@ void setUp(void) {
 
 void limit_component(void) {
   // Test that inputs/outputs are connected
-  TEST_ASSERT_EQUAL(lim_0.get_input(), 0);
-  TEST_ASSERT_EQUAL(lim_1.get_input(), 0);
-  TEST_ASSERT_EQUAL(lim_2.get_input(), 0);
-  TEST_ASSERT_EQUAL(lim_3.get_input(), 0);
-  TEST_ASSERT_EQUAL(lim_0.get_output(), 0);
-  TEST_ASSERT_EQUAL(lim_1.get_output(), 0);
-  TEST_ASSERT_EQUAL(lim_2.get_output(), 0);
-  TEST_ASSERT_EQUAL(lim_3.get_output(), 0);
+  TEST_ASSERT_EQUAL(lim_0.in.read(), 0);
+  TEST_ASSERT_EQUAL(lim_1.in.read(), 0);
+  TEST_ASSERT_EQUAL(lim_2.in.read(), 0);
+  TEST_ASSERT_EQUAL(lim_3.in.read(), 0);
+  TEST_ASSERT_EQUAL(lim_0.out.read(), 0);
+  TEST_ASSERT_EQUAL(lim_1.out.read(), 0);
+  TEST_ASSERT_EQUAL(lim_2.out.read(), 0);
+  TEST_ASSERT_EQUAL(lim_3.out.read(), 0);
 
   lim_0.simulate();
   lim_1.simulate();
@@ -57,10 +62,10 @@ void limit_component(void) {
   // Test only possitive or negative saturation
   in = 0;
 
-  TEST_ASSERT_EQUAL(lim_0.get_output(), 0);
-  TEST_ASSERT_EQUAL(lim_1.get_output(), 0);
-  TEST_ASSERT_EQUAL(lim_2.get_output(), 3);
-  TEST_ASSERT_EQUAL(lim_3.get_output(), -1);
+  TEST_ASSERT_EQUAL(lim_0.out.read(), 0);
+  TEST_ASSERT_EQUAL(lim_1.out.read(), 0);
+  TEST_ASSERT_EQUAL(lim_2.out.read(), 3);
+  TEST_ASSERT_EQUAL(lim_3.out.read(), -1);
 
   // Test Floating point
   in = 0.4;
@@ -70,10 +75,10 @@ void limit_component(void) {
   lim_2.simulate();
   lim_3.simulate();
 
-  TEST_ASSERT_EQUAL(lim_0.get_output(), 0.4);
-  TEST_ASSERT_EQUAL(lim_1.get_output(), 0.4);
-  TEST_ASSERT_EQUAL(lim_2.get_output(), 3);
-  TEST_ASSERT_EQUAL(lim_3.get_output(), -1);
+  TEST_ASSERT_EQUAL(lim_0.out.read(), 0.4);
+  TEST_ASSERT_EQUAL(lim_1.out.read(), 0.4);
+  TEST_ASSERT_EQUAL(lim_2.out.read(), 3);
+  TEST_ASSERT_EQUAL(lim_3.out.read(), -1);
 
   // Test positive floating point saturation
   in = 0.6;
@@ -83,10 +88,10 @@ void limit_component(void) {
   lim_2.simulate();
   lim_3.simulate();
 
-  TEST_ASSERT_EQUAL(lim_0.get_output(), 0.5);
-  TEST_ASSERT_EQUAL(lim_1.get_output(), 0.6);
-  TEST_ASSERT_EQUAL(lim_2.get_output(), 3);
-  TEST_ASSERT_EQUAL(lim_3.get_output(), -1);
+  TEST_ASSERT_EQUAL(lim_0.out.read(), 0.5);
+  TEST_ASSERT_EQUAL(lim_1.out.read(), 0.6);
+  TEST_ASSERT_EQUAL(lim_2.out.read(), 3);
+  TEST_ASSERT_EQUAL(lim_3.out.read(), -1);
 
   // Test positive Integer saturation
   in = 3.1;
@@ -96,10 +101,10 @@ void limit_component(void) {
   lim_2.simulate();
   lim_3.simulate();
 
-  TEST_ASSERT_EQUAL(lim_0.get_output(), 0.5);
-  TEST_ASSERT_EQUAL(lim_1.get_output(), 2);
-  TEST_ASSERT_EQUAL(lim_2.get_output(), 3.1);
-  TEST_ASSERT_EQUAL(lim_3.get_output(), -1);
+  TEST_ASSERT_EQUAL(lim_0.out.read(), 0.5);
+  TEST_ASSERT_EQUAL(lim_1.out.read(), 2);
+  TEST_ASSERT_EQUAL(lim_2.out.read(), 3.1);
+  TEST_ASSERT_EQUAL(lim_3.out.read(), -1);
 
   // Test only positive Integer saturation
   in = 5;
@@ -109,10 +114,10 @@ void limit_component(void) {
   lim_2.simulate();
   lim_3.simulate();
 
-  TEST_ASSERT_EQUAL(lim_0.get_output(), 0.5);
-  TEST_ASSERT_EQUAL(lim_1.get_output(), 2);
-  TEST_ASSERT_EQUAL(lim_2.get_output(), 4);
-  TEST_ASSERT_EQUAL(lim_3.get_output(), -1);
+  TEST_ASSERT_EQUAL(lim_0.out.read(), 0.5);
+  TEST_ASSERT_EQUAL(lim_1.out.read(), 2);
+  TEST_ASSERT_EQUAL(lim_2.out.read(), 4);
+  TEST_ASSERT_EQUAL(lim_3.out.read(), -1);
 
   // Test negative floating point saturation
   in = -0.6;
@@ -122,10 +127,10 @@ void limit_component(void) {
   lim_2.simulate();
   lim_3.simulate();
 
-  TEST_ASSERT_EQUAL(lim_0.get_output(), -0.5);
-  TEST_ASSERT_EQUAL(lim_1.get_output(), -0.6);
-  TEST_ASSERT_EQUAL(lim_2.get_output(), 3);
-  TEST_ASSERT_EQUAL(lim_3.get_output(), -1);
+  TEST_ASSERT_EQUAL(lim_0.out.read(), -0.5);
+  TEST_ASSERT_EQUAL(lim_1.out.read(), -0.6);
+  TEST_ASSERT_EQUAL(lim_2.out.read(), 3);
+  TEST_ASSERT_EQUAL(lim_3.out.read(), -1);
 
   // Test negative floating point
   in = -1.5;
@@ -135,10 +140,10 @@ void limit_component(void) {
   lim_2.simulate();
   lim_3.simulate();
 
-  TEST_ASSERT_EQUAL(lim_0.get_output(), -0.5);
-  TEST_ASSERT_EQUAL(lim_1.get_output(), -1.5);
-  TEST_ASSERT_EQUAL(lim_2.get_output(), 3);
-  TEST_ASSERT_EQUAL(lim_3.get_output(), -1.5);
+  TEST_ASSERT_EQUAL(lim_0.out.read(), -0.5);
+  TEST_ASSERT_EQUAL(lim_1.out.read(), -1.5);
+  TEST_ASSERT_EQUAL(lim_2.out.read(), 3);
+  TEST_ASSERT_EQUAL(lim_3.out.read(), -1.5);
 
   // Test negative saturation
   in = -2.1;
@@ -148,10 +153,10 @@ void limit_component(void) {
   lim_2.simulate();
   lim_3.simulate();
 
-  TEST_ASSERT_EQUAL(lim_0.get_output(), -0.5);
-  TEST_ASSERT_EQUAL(lim_1.get_output(), -2);
-  TEST_ASSERT_EQUAL(lim_2.get_output(), 3);
-  TEST_ASSERT_EQUAL(lim_3.get_output(), -2.1);
+  TEST_ASSERT_EQUAL(lim_0.out.read(), -0.5);
+  TEST_ASSERT_EQUAL(lim_1.out.read(), -2);
+  TEST_ASSERT_EQUAL(lim_2.out.read(), 3);
+  TEST_ASSERT_EQUAL(lim_3.out.read(), -2.1);
 
 
   // Test only negative saturation
@@ -162,10 +167,10 @@ void limit_component(void) {
   lim_2.simulate();
   lim_3.simulate();
 
-  TEST_ASSERT_EQUAL(lim_0.get_output(), -0.5);
-  TEST_ASSERT_EQUAL(lim_1.get_output(), -2);
-  TEST_ASSERT_EQUAL(lim_2.get_output(), 3);
-  TEST_ASSERT_EQUAL(lim_3.get_output(), -3);
+  TEST_ASSERT_EQUAL(lim_0.out.read(), -0.5);
+  TEST_ASSERT_EQUAL(lim_1.out.read(), -2);
+  TEST_ASSERT_EQUAL(lim_2.out.read(), 3);
+  TEST_ASSERT_EQUAL(lim_3.out.read(), -3);
 
 }
 
