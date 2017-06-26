@@ -54,13 +54,15 @@ public:
     float left = left_scale * left_speed.read();
     float right = right_scale * right_speed.read();
 
+    const int dead_zone_shift = 20;
+
     // Correct the deadzone
-    if (abs(left) < dead_zone) {
+    if (abs(left) < dead_zone + dead_zone_shift) {
       if (left < 0) {
-        left -= dead_zone;
+        left -= dead_zone + dead_zone_shift;
       }
       if (left > 0) {
-        left += dead_zone;
+        left += dead_zone + dead_zone_shift;
       }
     }
 
@@ -73,6 +75,8 @@ public:
         right += dead_zone;
       }
     }
+
+
 
     // Set scale, corrected and rotating speeds
     motors.setSpeeds(left, right);
