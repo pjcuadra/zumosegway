@@ -3,8 +3,8 @@
  * Zumo32U4 library.
  */
 
-#ifndef ZUMOIMU_H_
-#define ZUMOIMU_H_
+#ifndef ZUMOIMUFILTERS_H_
+#define ZUMOIMUFILTERS_H_
 
 #ifdef ARDUINO
 #include <Arduino.h>
@@ -12,11 +12,12 @@
 #endif
 
 #include<Component.h>
+#include<Plotter.h>
 
 /**
  * Signal Class
  */
-class ZumoIMU: public Component {
+class ZumoIMUFilters: public Component {
 public:
   /** Output port */
   Port out;
@@ -24,7 +25,7 @@ public:
   /**
    * Constructor
    */
-  ZumoIMU() {
+  ZumoIMUFilters() {
     // Set up the L3GD20H gyro.
     gyro.init();
 
@@ -38,21 +39,31 @@ public:
     // High-pass filter disabled.
     gyro.writeReg(L3G::CTRL5, 0b00000000);
 
-    // Set up the LSM303D accelerometer.
-    compass.init();
+    if (!compass.init()) {
+      // Failed to detect the compass.
+      ledRed(1);
+      while(1) {
+        delay(100);
+      }
+    }
 
-    // 50 Hz output data rate
-    compass.writeReg(LSM303::CTRL1, 0x57);
-
-    // 8 g full-scale
-    compass.writeReg(LSM303::CTRL2, 0x18);
+    compass.enableDefault();
 
     aAngle = 0;
-    gyroOffsetY = 0;
+    angle = 0;
 
-    // Calibrate gyro
     calibrate();
 
+  }
+
+  /**
+   * Print angles
+   */
+  void printAngles() {
+    // Plotter::plot(0, angle.read());
+    // Plotter::plot(1, gyAngle);
+    // Plotter::plot(2, aAngle);
+    // Serial1.println(angle.read());
   }
 
   /**
@@ -67,6 +78,7 @@ public:
     delay(500);
 
     angle = 0;
+    gyroOffsetY = 0;
 
     // Calibrate the gyro.
     for (uint16_t i = 0; i < 1024; i++) {
@@ -85,28 +97,13 @@ public:
   }
 
   /**
-   * Print angles
-   */
-  void printAngles() {
-    // lcd.gotoXY(0, 0);
-    // lcd.print(angle.read());
-    // lcd.print(F("    "));
-    //
-    // lcd.gotoXY(0, 1);
-    // lcd.print(aAngle);
-    // lcd.print("  ");
-    // Serial.println(angle.read());
-  }
-
-  /**
    * Reads the accelerometer and uses it to adjust the angle estimation.
    */
-  void correctAngleAccel() {
+  void get_compass_angle() {
     compass.read();
 
     // Calculate the angle according to the accelerometer.
     aAngle = -atan2(compass.a.z, -compass.a.x) * 180 / M_PI;
-
     // Calculate the magnitude of the measured acceleration vector,
     // in units of g.
     LSM303::vector<float> const aInG = {
@@ -123,16 +120,12 @@ public:
     float weight = 1 - 5 * abs(1 - mag);
     weight = constrain(weight, 0, 1);
     weight /= 100;
-
-    // Adjust the angle estimation.  The higher the weight, the
-    // more the angle gets adjusted.
-    angle = weight * aAngle + (1 - weight) * angle.read();
   }
 
   /**
    * Reads the gyro and uses it to update the angle estimation.
    */
-  void updateAngleGyro() {
+  void get_gyro_angle() {
     // Figure out how much time has passed since the last update.
     static uint16_t lastUpdate = 0;
     uint16_t m = micros();
@@ -144,7 +137,7 @@ public:
     // Calculate how much the angle has changed, in degrees, and
     // add it to our estimation of the current angle.  The gyro's
     // sensitivity is 0.07 dps per digit.
-    angle += ((float)gyro.g.y - gyroOffsetY) * 70 * dt / 1000000000;
+    gyAngle = ((float)gyro.g.y - gyroOffsetY) * 70 * dt / 1000000000;
   }
 
   /**
@@ -152,8 +145,12 @@ public:
    */
   inline float simulate() {
 
-    correctAngleAccel();
-    printAngles();
+    get_compass_angle();
+    get_gyro_angle();
+
+    angle = (filter_constant)*(angle.read() + gyAngle) + (1 - filter_constant)*(aAngle);
+
+    // printAngles();
 
     return out.write(-angle.read());
   }
@@ -172,6 +169,10 @@ private:
   double gyroOffsetY;
   /** This is just like "angle", but it is based solely on the accelerometer. */
   float aAngle;
+  /** This is just like "angle", but it is based solely on the accelerometer. */
+  float gyAngle;
+  const float filter_constant = 0.95;
+  Plotter plotter;
 };
 
 #endif
