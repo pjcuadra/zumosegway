@@ -169,10 +169,9 @@ private:
   double gyroOffsetY;
   /** This is just like "angle", but it is based solely on the accelerometer. */
   float aAngle;
-  /** This is just like "angle", but it is based solely on the accelerometer. */
+  /** This is just like "angle", but it is based solely on the gyro. */
   float gyAngle;
   const float filter_constant = 0.95;
-  Plotter plotter;
 };
 
 #endif

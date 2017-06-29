@@ -8,7 +8,7 @@ K_uc = 60;
 
 pkg load control
 
-# Create the system for the plant
+% Create the system for the plant
 plant = tf([-K_s 0], [l 0 -g])
 figure(1)
 rlocus(plant)

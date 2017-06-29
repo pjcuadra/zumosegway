@@ -25,24 +25,31 @@ class Plotter {
 public:
 
   /**
+   * Constructor
+   */
+  Plotter(HardwareSerial * serial) {
+    this->serial = serial;
+  }
+
+  /**
    * Add a value to the plot
    * @param plot_num number of the plot
    * @param value value to be set
    */
-  inline static void plot(int plot_num, float value) {
-    Serial1.print(plot_num + 1);
-    Serial1.print(" ");
-    Serial1.println(value);
+  inline void plot(int plot_num, float value) {
+    serial->print(plot_num + 1);
+    serial->print(" ");
+    serial->println(value);
   }
 
   /**
    * Send information
    * @param message info message
    */
-  inline static void info(char message[30]) {
-    Serial1.print(0);
-    Serial1.print(" [INFO] ");
-    Serial1.println(message);
+  inline void info(const char * message) {
+    serial->print(0);
+    serial->print(" [INFO] ");
+    serial->println(message);
   }
 
   /**
@@ -50,12 +57,12 @@ public:
    * @param message message to be displayed
    * @param value value to be concatenated with the message
    */
-  inline static void info(char message[30], float value) {
-    Serial1.print(0);
-    Serial1.print(" [INFO] ");
-    Serial1.print(message);
-    Serial1.print(" ");
-    Serial1.println(value);
+  inline void info(const char * message, float value) {
+    serial->print(0);
+    serial->print(" [INFO] ");
+    serial->print(message);
+    serial->print(" ");
+    serial->println(value);
   }
 
   /**
@@ -63,24 +70,17 @@ public:
    * @param plot_num number of the plot
    * @param cmd configure command
    */
-  inline static void config_plot(int plot_num, char cmd[30]) {
-    Serial1.print(0);
-    Serial1.print(" [CONFIG] plot:{");
-    Serial1.print(plot_num);
-    Serial1.print("} ");
-    Serial1.println(message);
-  }
-
-  /**
-   * Initialize the plotter
-   */
-  inline static void init() {
-    Serial1.begin(baudrate);
+  inline void config_plot(int plot_num, const char * cmd) {
+    serial->print(0);
+    serial->print(" [CONFIG] plot:{");
+    serial->print(plot_num);
+    serial->print("} ");
+    serial->println(cmd);
   }
 
 private:
-  /** Defualt baudrate */
-  static const int baudrate = 115200;
+  /** Serial Device */
+  HardwareSerial * serial;
 };
 
 #endif

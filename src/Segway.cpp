@@ -25,7 +25,7 @@
 #include <ZumoMotors.h>
 #include <SoftwareSerial.h>
 
-#define FILTERS 1
+// #define FILTERS 1
 
 // Needed for starting balancing
 Zumo32U4ButtonA buttonA;
@@ -90,16 +90,22 @@ enum zumo_states_e {
 const float move_angle = 1;
 /** Initializing Cycles */
 const int init_cycles = 100;
+/** Number of oscilation cycles within the measured time (t_cr calculation) */
+const float oscilations_count = 13.0;
+/** Number of samples within the measured time (t_cr calculation) */
+const float measured_samples = 100.0;
+/** Samplint Period */
+const float sampling_period_ms = sampling_period/1000.0;
 /** Oscilation period (Experimentally obtained) */
-const float t_cr = 0.150;
+const float t_cr = sampling_period * (measured_samples/oscilations_count) / 1000;
 /** Proportional gain till oscilation */
 const float k_cr = 55;
 /** Proportional gain */
-const float P = 0.6 * k_cr;
+float P = 0.6 * k_cr;
 /** Integral gain */
-const float I = 1 / (0.5 * t_cr);
+float I = 1 / (0.5 * t_cr);
 /** Derivative gain */
-const float D = 1 / (0.125 * t_cr);
+float D = 1 / (0.125 * t_cr);
 
 /** Serial received character */
 char c = ' ';
@@ -113,6 +119,8 @@ float calibrated_target_angle = -1.4;
 zumo_states_e curr_state = S_INITIALIZING;
 /** Initializing cycles init_cycle_count */
 int init_cycle_count;
+/** Serial Plotter */
+Plotter * plotter;
 
 /**
  * Setup function
@@ -122,6 +130,7 @@ void setup() {
   Wire.begin();
   delay(500);
   Serial1.begin(115200);
+  plotter = new Plotter(&Serial1);
   delay(1000);
 
   target_angle = calibrated_target_angle;
@@ -138,22 +147,23 @@ void setup() {
   motors->dead_zone = 0;
 
   // Send PID values
-  Plotter::info("P", P);
-  Plotter::info("I", I);
-  Plotter::info("D", D);
+  plotter->info("P", P);
+  plotter->info("t_cr", t_cr);
+  plotter->info("I", I);
+  plotter->info("D", D);
 
   // Configure the plots
-  Plotter::config_plot(0, "title:{Current Time}");
-  Plotter::config_plot(0, "period:{20}");
+  plotter->config_plot(0, "title:{Current Time}");
+  plotter->config_plot(0, "period:{20}");
 
-  Plotter::config_plot(1, "title:{Sampling Period}");
-  Plotter::config_plot(0, "period:{20}");
+  plotter->config_plot(1, "title:{Sampling Period}");
+  plotter->config_plot(0, "period:{20}");
 
-  Plotter::config_plot(2, "title:{Target Value}");
-  Plotter::config_plot(0, "period:{20}");
+  plotter->config_plot(2, "title:{Target Value}");
+  plotter->config_plot(0, "period:{20}");
 
-  Plotter::config_plot(3, "title:{Angle}");
-  Plotter::config_plot(0, "period:{20}");
+  plotter->config_plot(3, "title:{Angle}");
+  plotter->config_plot(0, "period:{20}");
 
   // Create all components. Values taken from Zumo balancing example
   pid_controller = new PID(P, I, D, -40, 40);
@@ -180,7 +190,7 @@ void setup() {
   // Init the counter
   init_cycle_count = 0;
 
-  Plotter::info("Initializing State");
+  plotter->info("Initializing State");
   curr_state = S_INITIALIZING;
 }
 
@@ -200,7 +210,7 @@ void loop() {
       // Change state once the amount of cycles have been reached
       if (init_cycle_count > init_cycles) {
         curr_state = S_BALANCING;
-        Plotter::info("Balacing State");
+        plotter->info("Balacing State");
         speed = 0;
       }
 
@@ -213,25 +223,25 @@ void loop() {
       switch (c) {
         case B_SELECT: // Start calibrating state
           curr_state = S_CALIBRATING;
-          Plotter::info("Calibration State");
+          plotter->info("Calibration State");
           break;
         case B_UP: // Start moving foward
           curr_state = S_MOVING_FORWARD;
-          Plotter::info("Moving Forward State");
+          plotter->info("Moving Forward State");
           target_angle = calibrated_target_angle - move_angle;
           break;
         case B_DOWN: // Start moving backwards
           curr_state = S_MOVING_BACKWARDS;
-          Plotter::info("Moving Backwards State");
+          plotter->info("Moving Backwards State");
           target_angle = calibrated_target_angle + move_angle;
           break;
         case B_TRIAGLE:
           curr_state = S_BALANCING;
-          Plotter::info("Balancing State");
+          plotter->info("Balancing State");
           break;
         case B_CROSS:
           curr_state = S_BALANCING;
-          Plotter::info("Balancing State");
+          plotter->info("Balancing State");
           break;
         default:
           break;
@@ -301,15 +311,13 @@ void loop() {
   byte current_time = millis();
   if ((byte)(current_time - sampling_time) >= sampling_period) {
     // Current Time
-    Plotter::plot(0, current_time);
+    plotter->plot(0, current_time);
 
     // Sampling period
-    Plotter::plot(1, (byte)(current_time - sampling_time));
+    plotter->plot(1, (byte)(current_time - sampling_time));
 
     // Target Angle
-    Plotter::plot(2, target_angle.read());
-
-    Serial.println();
+    plotter->plot(2, target_angle.read());
 
     sampling_time = current_time;
     simulate_circuit();
@@ -323,8 +331,7 @@ void simulate_circuit() {
   // IMU simulation doesn't depend on angle
   imu->simulate();
 
-  Plotter::plot(3, angle.read());
-  Serial.println(angle.read());
+  plotter->plot(3, angle.read());
 
   if (curr_state == S_INITIALIZING) {
     init_cycle_count++;
@@ -335,7 +342,7 @@ void simulate_circuit() {
   // angle > 45
   if (abs(angle.read()) > 45) {
     speed = 0;
-    Plotter::info("Angle greater than 45");
+    plotter->info("Angle greater than 45");
   } else {
     inv_feedback->simulate();
     error_adder->simulate();
