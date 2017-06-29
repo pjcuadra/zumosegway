@@ -54,7 +54,7 @@ public:
     float left = left_scale * left_speed.read();
     float right = right_scale * right_speed.read();
 
-    const int dead_zone_shift = 20;
+    const int dead_zone_shift = 0;
 
     // Correct the deadzone
     if (abs(left) < dead_zone + dead_zone_shift) {

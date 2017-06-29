@@ -143,7 +143,7 @@ input. Using the approximations;
 Then we can obtain the transfer function;
 
 .. math::
-  H_r(s) = \frac{\Theta(s)}{F(s)} = \frac{1}{lms^s - mg}
+  H_r(s) = \frac{\Theta(s)}{F(s)} = \frac{1}{mg - lms^s}
 
 .. note::
   The rotational friction is neglected because we are assuming that the bar is
@@ -165,7 +165,7 @@ Considering the linear momentum we have that;
 Friction component
 ******************
 
-And now considering the friction dynamic coefficient;
+And now considering the friction static coefficient;
 
 .. math::
   F_b = b \dot{x}
@@ -210,9 +210,9 @@ General Transfer Function
 Combining both transfer function we have;
 
 .. math::
-  H(s) = H_r(s)H_l(s) = \frac{K_s(ms + b)}{lms^s - mg}
+  H(s) = H_r(s)H_l(s) = \frac{-K_s(ms + b)}{lms^2 - mg}
 
-  H(s) = \frac{K_s(s + b/m)}{ls^s - g}
+  H(s) = \frac{-K_s(s + b/m)}{ls^2 -g}
 
 
 Physical values
@@ -269,4 +269,4 @@ The experiment gave us important results listed bellow;
   set to the motors that generate no linear movement.
 * :math:`K_s = (0.012 \pm 0.005) m/s` for values from 45 to 400 and from -400
   to -45.
-* :math:`K_s` depends strongly on the batter level. 
+* :math:`K_s` depends strongly on the batter level.
