@@ -27,7 +27,7 @@ public:
    * Set the value of an internal probe variable (for debug)
    * @param value value to be stored
    */
-  inline void set_probe(float value) {
+  inline void set_probe(double value) {
     probe_value = value;
   }
 

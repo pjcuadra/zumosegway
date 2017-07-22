@@ -31,131 +31,107 @@ public:
   /** Output port */
   Port out;
 
-  /** Input Signal */
-  Signal s_in;
-
-  /** Integrator output signal  */
-  Signal s_i_out;
-  /** Derivator output signal  */
-  Signal s_d_out;
-
-  /** Proportinal gain output signal  */
-  Signal s_g_p_out;
-  /** Integral gain output signal  */
-  Signal s_g_i_out;
-  /** Derivate gain output signal  */
-  Signal s_g_d_out;
-
-  /** Intermediate adder output signal  */
-  Signal s_add_tmp;
-
-  /** Output Signal */
-  Signal s_out;
-
   /**
    * Simulate the circuit component
+   *
    * @param gain_p gain for the proportinal component
    * @param gain_i gain for the integral component
    * @param gain_d gain for the differential component
+   * @param freq sampling frequency
+   * @param lower_limit lower saturation limit
+   * @param upper_limit upper saturation limit
    */
-  PID(float gain_p, float gain_i, float gain_d) :
-    P(gain_p),
-    I(gain_i),
-    D(gain_d),
-    integral(-100, 100) {
-    build_circuit();
+  PID(double gain_p,
+    double gain_i,
+    double gain_d,
+    double freq,
+    int lower_limit,
+    int upper_limit) {
+
+    P = gain_p;
+    I = gain_i;
+    D = gain_d;
+
+    this->lower_limit = lower_limit;
+    this->upper_limit = upper_limit;
+
+    a = (P + I/(2 * freq) + D * freq);
+    b = (-P + I/(2 * freq) - 2 * freq * D);
+    c = D * freq;
+
+    u_1 = 0;
+    e_1 = 0;
+    e_2 = 0;
   }
 
   /**
    * Simulate the circuit component
+   *
    * @param gain_p gain for the proportinal component
    * @param gain_i gain for the integral component
    * @param gain_d gain for the differential component
-   * @param integral_lower lower saturation limit for the integral
-   * @param integral_upper upper saturation limit for the integral
    */
-  PID(float gain_p, float gain_i, float gain_d, float integral_lower, float integral_upper) :
-    P(gain_p),
-    I(gain_i),
-    D(gain_d),
-    integral(integral_lower, integral_upper) {
-    build_circuit();
+  PID(double gain_p,
+    double gain_i,
+    double gain_d,
+    double freq) {
+
+    P = gain_p;
+    I = gain_i;
+    D = gain_d;
+
+    this->lower_limit = -10000;
+    this->upper_limit = 10000;
+
+    a = (P + I/(2 * freq) + D * freq);
+    b = (-P + I/(2 * freq) - 2 * freq * D);
+    c = D * freq;
+
+    u_1 = 0;
+    e_1 = 0;
+    e_2 = 0;
   }
 
   /**
    * Simulate the circuit component
    */
-  inline float simulate() {
+  inline double simulate() {
 
-    s_in = in.read();
+    out.write(constrain(u_1 + a * in.read() + b * e_1 + c * e_2,
+      this->lower_limit,
+      this->upper_limit));
 
-    // Simulation must be done as the signal propagates
+    // Shift values
+    e_2 = e_1;
+    e_1 = in.read();
+    u_1 = out.read();
 
-    // Integral
-    integral.simulate();
-    // Differential
-    diff.simulate();
-
-    // Gains
-    P.simulate();
-    D.simulate();
-    I.simulate();
-
-    // Adders
-    ad_0.simulate();
-    ad_1.simulate();
-
-    // Return the updated value
-    return out.write(s_out.read());
+    return out.read();
   }
 
 private:
   /** Gain component for proportinal behaviour */
-  Gain P;
+  double P;
   /** Gain component for integral behaviour */
-  Gain I;
+  double I;
   /** Gain component for differential behaviour */
-  Gain D;
-  /** Adder component */
-  Adder ad_0;
-  /** Adder component */
-  Adder ad_1;
-  /** Intergral component */
-  Integral integral;
-  /** Differential component */
-  Derivative diff;
-
-  /**
-   * Interconnect all subblocks/subcomponents
-   */
-  void build_circuit() {
-    // Connect to the integral and derivate
-    integral.in = s_in;
-    integral.out = s_i_out;
-
-    diff.in = s_in;
-    diff.out = s_d_out;
-
-    // Connect the gain of every component
-    P.in = s_in;
-    P.out = s_g_p_out;
-
-    I.in = s_i_out;
-    I.out = s_g_i_out;
-
-    D.in = s_d_out;
-    D.out = s_g_d_out;
-
-    // Add all together
-    ad_0.in_0 = s_g_p_out;
-    ad_0.in_1 = s_g_i_out;
-    ad_0.out = s_add_tmp;
-
-    ad_1.in_0 = s_add_tmp;
-    ad_1.in_1 = s_g_d_out;
-    ad_1.out = s_out;
-  }
-
+  double D;
+  /** Lower saturation limit */
+  int lower_limit;
+  /** Upper saturation limit */
+  int upper_limit;
+  /** Simplification constant */
+  double a;
+  /** Simplification constant */
+  double b;
+  /** Simplification constant */
+  double c;
+  /** Previous output u(k-1) */
+  double u_1;
+  /** Previous input e(k-1) */
+  double e_1;
+  /** Previous input e(k-2) */
+  double e_2;
 };
 
 #endif

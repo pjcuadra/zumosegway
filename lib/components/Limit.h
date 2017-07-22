@@ -36,7 +36,7 @@ public:
    * @param lower lower limit
    * @param upper upper limit
    */
-  Limit(float lower, float upper) {
+  Limit(double lower, double upper) {
     this->upper = upper;
     this->lower = lower;
   }
@@ -44,7 +44,7 @@ public:
   /**
    * Simulate the circuit component
    */
-  inline float simulate() {
+  inline double simulate() {
     #ifdef ARDUINO
       return out.write(constrain(in.read(), lower, upper));
     #else
@@ -60,9 +60,9 @@ public:
 
 private:
   /** Upper limit */
-  float upper;
+  double upper;
   /** Lower limit */
-  float lower;
+  double lower;
 };
 
 #endif

@@ -31,20 +31,22 @@ public:
    * Constructor
    * @param lower lower saturation limit
    * @param upper upper saturation limit
+   * @param freq sampling frequency
    */
-  Integral(float lower, float upper) : lim(lower, upper){
+  Integral(double lower, double upper, double freq) : lim(lower, upper){
     lim.in = stored;
     lim.out = s_out;
+    this->freq = freq;
   }
 
   /**
    * Simulate the circuit component
    */
-  inline float simulate() {
+  inline double simulate() {
     this->stored += in.read();
     lim.simulate();
     this->stored = s_out.read();
-    return out.write(s_out.read());
+    return out.write(s_out.read() / freq);
   }
 
 private:
@@ -54,6 +56,8 @@ private:
   Signal s_out;
   /** Limit circuit component */
   Limit lim;
+  /** Sampling frequency */
+  double freq;
 };
 
 #endif

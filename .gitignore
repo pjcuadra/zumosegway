@@ -5,3 +5,4 @@
 lib/autogen
 venv
 doc/build
+octave-workspace

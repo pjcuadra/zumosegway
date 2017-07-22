@@ -27,7 +27,7 @@ public:
   /**
    * Constructor
    */
-  Plotter(HardwareSerial * serial) {
+  Plotter(Serial_ * serial) {
     this->serial = serial;
   }
 
@@ -36,7 +36,7 @@ public:
    * @param plot_num number of the plot
    * @param value value to be set
    */
-  inline void plot(int plot_num, float value) {
+  inline void plot(int plot_num, double value) {
     serial->print(plot_num + 1);
     serial->print(" ");
     serial->println(value);
@@ -57,7 +57,7 @@ public:
    * @param message message to be displayed
    * @param value value to be concatenated with the message
    */
-  inline void info(const char * message, float value) {
+  inline void info(const char * message, double value) {
     serial->print(0);
     serial->print(" [INFO] ");
     serial->print(message);
@@ -80,7 +80,7 @@ public:
 
 private:
   /** Serial Device */
-  HardwareSerial * serial;
+  Serial_ * serial;
 };
 
 #endif

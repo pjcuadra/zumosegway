@@ -30,14 +30,14 @@ public:
   /**
    * Read the value from the signal
    */
-  float read() {
+  double read() {
     return signal_value;
   }
 
   /**
    * Write a value to the signal
    */
-  float write(float value) {
+  double write(double value) {
     this->signal_value = value;
     return this->signal_value;
   }
@@ -45,7 +45,7 @@ public:
   /**
    * Get the signal's reference
    */
-  float * get() {
+  double * get() {
     return &this->signal_value;
   }
 
@@ -67,7 +67,7 @@ public:
   /**
    * Equal operator overloading
    */
-  Signal& operator= (float value) {
+  Signal& operator= (double value) {
     this->signal_value = value;
     return *this;
   }
@@ -85,7 +85,7 @@ public:
   /**
    * += operator overloading
    */
-  Signal& operator+= (float other) {
+  Signal& operator+= (double other) {
 
      this->signal_value += other;
 
@@ -94,7 +94,7 @@ public:
 
 private:
   /** Signal value */
-  float signal_value;
+  double signal_value;
 
 };
 

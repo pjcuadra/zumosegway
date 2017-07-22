@@ -13,6 +13,17 @@ plant = tf([-K_s 0], [l 0 -g])
 figure(1)
 rlocus(plant)
 
+state_model = ss(plant);
+disp("Controlability Matrix")
+co = ctrb(plant)
+
+disp("Determinant of Co")
+det(co)
+
+if (det(co) == 0) 
+  disp("The Plant isn't controlable")
+endif
+
 # Create the PID controller
 cont = pid(40, 1, 5);
 
@@ -22,7 +33,7 @@ figure(2)
 #rlocus(cascade);
 
 # Get the close loop system
-fbl = feedback(cascade, 1)
+fbl = feedback(cascade, 1);
 ss(fbl)
 
 figure(3)

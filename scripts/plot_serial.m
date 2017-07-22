@@ -7,7 +7,8 @@ pkg load instrument-control
 % Constants
 BUFF_SIZE = 256;
 BAUDRATE = 115200;
-DEVICE = '/dev/rfcomm0';
+%DEVICE = '/dev/rfcomm0';
+DEVICE = '/dev/ttyACM0';
 REFRESH_RATE = 10;
 
 refresh_count = 0;
@@ -35,7 +36,7 @@ try
     
     k = kbhit (1);
     
-    if (k == 'q')
+    if (k == 'x')
       break;
     endif
 
@@ -66,9 +67,9 @@ try
       count{fig_num} = 0;
     endif
 
-    % if (fig_num != 2)
-    %   continue;
-    % endif
+    if (fig_num != 4)
+       continue;
+    endif
 
     count{fig_num}++;
     curr_value_idx = size(t{fig_num})(2) + 1;
