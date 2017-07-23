@@ -27,6 +27,16 @@
 #include <StateFeedback.h>
 #include <Adder.h>
 
+// Constants
+/** Controll Law */
+const double K[2] = {0.72944, -2.18832};
+/** Sampling period in ms */
+const byte sampling_period = 20;
+/** Initializing Cycles */
+const int init_cycles = 100;
+
+
+
 // Needed for starting balancing
 Zumo32U4ButtonA buttonA;
 
@@ -36,18 +46,29 @@ StateFeedback<2, 1> * control_law;
 Adder * error_calc;
 
 // Signals
+/** Angle of the Segway with respect to the perpendicular to the floor */
 Signal angle;
+/** Angular speed of the Segway */
 Signal angular_speed;
+/** Linear speed of the Segway */
 Signal speed;
-Signal error;
-Signal target_angle;
+/** Corrected Angle because of the deviation of the center of gravity */
+Signal corrected_angle;
+/** Negative of the angle of the center of gravity */
+Signal center_angle;
 
-// Controll Law
-double K[2] = {0.72944, -2.18832};
 
 // Other variables
-byte sampling_time = 0;
-const byte sampling_period = 20;
+/** Last sampled time */
+byte last_sampled_time = 0;
+/** Serial received character */
+char c = ' ';
+/** Current state */
+zumo_states_e curr_state = S_INITIALIZING;
+/** Initializing cycles init_cycle_count */
+int init_cycle_count;
+/** Serial Plotter */
+Plotter * plotter;
 
 // Functions prototypes
 void simulate_circuit();
@@ -81,19 +102,6 @@ enum zumo_states_e {
   S_MOVING_BACKWARDS,
 };
 
-/** Initializing Cycles */
-const int init_cycles = 100;
-/** Serial received character */
-char c = ' ';
-/** Calibrated Target Angle */
-
-/** Current state */
-zumo_states_e curr_state = S_INITIALIZING;
-/** Initializing cycles init_cycle_count */
-int init_cycle_count;
-/** Serial Plotter */
-Plotter * plotter;
-
 /**
  * Setup function
  */
@@ -112,11 +120,11 @@ void setup() {
   control_law = new StateFeedback<2, 1>(K);
   error_calc = new Adder();
 
-  target_angle = -2;
+  center_angle = -2;
 
   plotter->info("K[0]", K[0]);
   plotter->info("K[1]", K[1]);
-  plotter->info("Target Angle", target_angle.read());
+  plotter->info("Target Angle", center_angle.read());
 
   // Configure the plots
   plotter->config_plot(0, "title:{Current Time}");
@@ -236,14 +244,14 @@ void loop() {
 
     // Sampling period is sampling_period
   byte current_time = millis();
-  if ((byte)(current_time - sampling_time) >= sampling_period) {
+  if ((byte)(current_time - last_sampled_time) >= sampling_period) {
     // Current Time
     plotter->plot(0, current_time);
 
     // Sampling period
-    plotter->plot(1, (byte)(current_time - sampling_time));
+    plotter->plot(1, (byte)(current_time - last_sampled_time));
 
-    sampling_time = current_time;
+    last_sampled_time = current_time;
     simulate_circuit();
   }
 }
@@ -274,20 +282,20 @@ void build_circuit() {
   segway->angle = angle;
   segway->angular_speed = angular_speed;
 
+  // Connect the error calculator
+  error_calc->in_0 = angle;
+  error_calc->in_1 = center_angle;
+  error_calc->out = corrected_angle;
+
   // Connect Control Law input
-  control_law->in[0] = angle;
+  control_law->in[0] = corrected_angle;
   control_law->in[1] = angular_speed;
 
   // Connect Control Law output
   control_law->out[0] = speed;
 
-  // Connect the error calculator
-  error_calc->in_0 = speed;
-  error_calc->in_1 = target_angle;
-  error_calc->out = error;
-
   // Connect Plant's output
-  segway->speed = error;
+  segway->speed = speed;
 }
 
 #endif
