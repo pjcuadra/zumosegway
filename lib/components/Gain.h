@@ -30,20 +30,20 @@ public:
    * Constructor
    * @param gain_k gain
    */
-  Gain(float gain_k) {
+  Gain(double gain_k) {
     this->gain_k = gain_k;
   }
 
   /**
    * Simulate the circuit component
    */
-  inline float simulate() {
+  inline double simulate() {
     return out.write(gain_k * in.read());
   }
 
 private:
   /** Gain */
-  float gain_k;
+  double gain_k;
 
 };
 

@@ -30,7 +30,7 @@ public:
   /**
    * Simulate the circuit component
    */
-  inline float simulate() {
+  inline double simulate() {
     return out.write(in_0.read() + in_1.read());
   }
 };

@@ -13,14 +13,17 @@
 
 #include<Component.h>
 #include<Plotter.h>
+#include<Filter.h>
 
 /**
  * Signal Class
  */
 class ZumoIMUFilters: public Component {
 public:
-  /** Output port */
-  Port out;
+  /** Angle output port */
+  Port angle_out;
+  /** Angular speed output port */
+  Port angular_speed_out;
 
   /**
    * Constructor
@@ -50,34 +53,29 @@ public:
     compass.enableDefault();
 
     aAngle = 0;
-    angle = 0;
+
+    butter_lp_5_hz = new Filter<3>(b_lp_5_hz, a_lp_5_hz);
+    butter_hp_5_hz = new Filter<3>(b_hp_5_hz, a_hp_5_hz);
+
+    butter_lp_5_hz->in = aAngle;
+    butter_lp_5_hz->out = angle_out;
+
+    butter_lp_5_hz->in = gyAngle;
+    butter_lp_5_hz->out = angular_speed_out;
 
     calibrate();
 
   }
 
   /**
-   * Print angles
-   */
-  void printAngles() {
-    // Plotter::plot(0, angle.read());
-    // Plotter::plot(1, gyAngle);
-    // Plotter::plot(2, aAngle);
-    // Serial1.println(angle.read());
-  }
-
-  /**
    * Calibrate Gyro
    */
   void calibrate() {
-    lcd.clear();
-    lcd.print(F("Gyro cal"));
     ledYellow(1);
 
     // Delay to give the user time to remove their finger.
     delay(500);
 
-    angle = 0;
     gyroOffsetY = 0;
 
     // Calibrate the gyro.
@@ -104,22 +102,6 @@ public:
 
     // Calculate the angle according to the accelerometer.
     aAngle = -atan2(compass.a.z, -compass.a.x) * 180 / M_PI;
-    // Calculate the magnitude of the measured acceleration vector,
-    // in units of g.
-    LSM303::vector<float> const aInG = {
-      (float)compass.a.x / 4096,
-      (float)compass.a.y / 4096,
-      (float)compass.a.z / 4096}
-    ;
-    float mag = sqrt(LSM303::vector_dot(&aInG, &aInG));
-
-    // Calculate how much weight we should give to the
-    // accelerometer reading.  When the magnitude is not close to
-    // 1 g, we trust it less because it is being influenced by
-    // non-gravity accelerations, so we give it a lower weight.
-    float weight = 1 - 5 * abs(1 - mag);
-    weight = constrain(weight, 0, 1);
-    weight /= 100;
   }
 
   /**
@@ -137,22 +119,25 @@ public:
     // Calculate how much the angle has changed, in degrees, and
     // add it to our estimation of the current angle.  The gyro's
     // sensitivity is 0.07 dps per digit.
-    gyAngle = ((float)gyro.g.y - gyroOffsetY) * 70 * dt / 1000000000;
+    gyAngle.write(((double)gyro.g.y - gyroOffsetY) * 70 * dt / 1000000000);
   }
 
   /**
    * Simluate the component
    */
-  inline float simulate() {
+  inline double simulate() {
 
     get_compass_angle();
     get_gyro_angle();
 
-    angle = (filter_constant)*(angle.read() + gyAngle) + (1 - filter_constant)*(aAngle);
+    butter_lp_5_hz->simulate();
+    butter_hp_5_hz->simulate();
 
-    // printAngles();
+    // Invert the outputs
+    angle_out.write(-angle_out.read());
+    angular_speed_out.write(-angular_speed_out.read());
 
-    return out.write(-angle.read());
+    return 0;
   }
 
 
@@ -163,16 +148,24 @@ private:
   LSM303 compass;
   /** LCD */
   Zumo32U4LCD lcd;
-  /** Angle signal */
-  Signal angle;
   /** Average reading obtained from the gyro's Y axis during calibration. */
   double gyroOffsetY;
-  /** This is just like "angle", but it is based solely on the accelerometer. */
-  float aAngle;
-  /** This is just like "angle", but it is based solely on the accelerometer. */
-  float gyAngle;
-  const float filter_constant = 0.95;
-  Plotter plotter;
+  /** Angle read from accelerometer */
+  Signal aAngle;
+  /** Angle rate read from gyro */
+  Signal gyAngle;
+  /** Low-pass filter for accelerometer */
+  Filter<3> * butter_lp_5_hz;
+  /** High-pass filter for gyro */
+  Filter<3> * butter_hp_5_hz;
+  /** B coefficients for Low-pass filter (f_c = 5 Hz / f_s = 50 Hz) */
+  const double b_lp_5_hz[4] = {0.0028982, 0.0086946, 0.0086946, 0.0028982};
+  /** A coefficients for Low-pass filter (f_c = 5 Hz / f_s = 50 Hz) */
+  const double a_lp_5_hz[4] = {1.00000, -2.37409, 1.92936, -0.53208};
+  /** B coefficients for High-pass filter (f_c = 5 Hz / f_s = 50 Hz) */
+  const double b_hp_5_hz[4] = {0.72944, -2.18832,  2.18832, -0.72944};
+  /** A coefficients for High-pass filter (f_c = 5 Hz / f_s = 50 Hz) */
+  const double a_hp_5_hz[4] = {1.00000, -2.37409,  1.92936, -0.53208};
 };
 
 #endif

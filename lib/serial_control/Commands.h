@@ -11,38 +11,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-#ifndef COMPONENT_H_
-#define COMPONENT_H_
+#ifndef SERIAL_COMMANDS_H_
+#define SERIAL_COMMANDS_H_
 
-#include<Port.h>
-#include<Signal.h>
-
-/**
- * Component Abstract Class
- */
-class Component {
-public:
-
-  /**
-   * Set the value of an internal probe variable (for debug)
-   * @param value value to be stored
-   */
-  inline void set_probe(double value) {
-    probe_value = value;
-  }
-
-  /**
-   * Get the value of the internal probe variable (for debug)
-   * @return the value of the probe variable
-   */
-  inline float probe() {
-    return probe_value;
-  }
-
-private:
-  /** Probe Variable */
-  float probe_value;
-
-};
+// Controller buttoms
+/** Left button */
+const byte B_LEFT    = 48;
+/** Up button */
+const byte B_UP      = 49;
+/** Right button */
+const byte B_RIGHT   = 50;
+/** Down button */
+const byte B_DOWN    = 51;
+/** Select button */
+const byte B_SELECT  = 52;
+/** Start button */
+const byte B_START   = 53;
+/** Square button */
+const byte B_SQUARE  = 54;
+/** Triangle button */
+const byte B_TRIAGLE = 55;
+/** Cross button */
+const byte B_CROSS   = 56;
+/** Circle button */
+const byte B_CIRCLE  = 57;
 
 #endif

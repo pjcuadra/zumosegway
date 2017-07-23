@@ -31,9 +31,9 @@ public:
   /** Right speed in port */
   Port right_speed;
   /** Scale left speed */
-  float left_scale;
+  double left_scale;
   /** Scale right speed */
-  float right_scale;
+  double right_scale;
   /** Dead zone range */
   int dead_zone;
 
@@ -50,9 +50,9 @@ public:
   /**
    *  Simulate the component
    */
-  inline float simulate() {
-    float left = left_scale * left_speed.read();
-    float right = right_scale * right_speed.read();
+  inline double simulate() {
+    double left = left_scale * left_speed.read();
+    double right = right_scale * right_speed.read();
 
     const int dead_zone_shift = 0;
 

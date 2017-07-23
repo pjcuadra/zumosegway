@@ -109,18 +109,18 @@ public:
 
     // Calculate the magnitude of the measured acceleration vector,
     // in units of g.
-    LSM303::vector<float> const aInG = {
-      (float)compass.a.x / 4096,
-      (float)compass.a.y / 4096,
-      (float)compass.a.z / 4096}
+    LSM303::vector<double> const aInG = {
+      (double)compass.a.x / 4096,
+      (double)compass.a.y / 4096,
+      (double)compass.a.z / 4096}
     ;
-    float mag = sqrt(LSM303::vector_dot(&aInG, &aInG));
+    double mag = sqrt(LSM303::vector_dot(&aInG, &aInG));
 
     // Calculate how much weight we should give to the
     // accelerometer reading.  When the magnitude is not close to
     // 1 g, we trust it less because it is being influenced by
     // non-gravity accelerations, so we give it a lower weight.
-    float weight = 1 - 5 * abs(1 - mag);
+    double weight = 1 - 5 * abs(1 - mag);
     weight = constrain(weight, 0, 1);
     weight /= 100;
 
@@ -144,13 +144,13 @@ public:
     // Calculate how much the angle has changed, in degrees, and
     // add it to our estimation of the current angle.  The gyro's
     // sensitivity is 0.07 dps per digit.
-    angle += ((float)gyro.g.y - gyroOffsetY) * 70 * dt / 1000000000;
+    angle += ((double)gyro.g.y - gyroOffsetY) * 70 * dt / 1000000000;
   }
 
   /**
    * Simluate the component
    */
-  inline float simulate() {
+  inline double simulate() {
 
     correctAngleAccel();
     printAngles();
@@ -171,7 +171,7 @@ private:
   /** Average reading obtained from the gyro's Y axis during calibration. */
   double gyroOffsetY;
   /** This is just like "angle", but it is based solely on the accelerometer. */
-  float aAngle;
+  double aAngle;
 };
 
 #endif

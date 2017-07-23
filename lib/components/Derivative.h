@@ -21,21 +21,34 @@
  */
 class Derivative: public Component {
 public:
+  /* Input port */
   Port in;
+  /* Output port */
   Port out;
+
+  /**
+   * Constructor
+   * @param freq sampling frequency
+   */
+  Derivative(double freq) {
+    this->freq = freq;
+  }
+
   /**
    * Simulate the circuit component
    */
-  inline float simulate() {
-    float input = in.read();
-    float tmp = input - stored;
+  inline double simulate() {
+    double input = in.read();
+    double tmp = (input - stored)*freq;
     stored = input;
     return out.write(tmp);
   }
 
 private:
   /** Internal store variable */
-  float stored = 0;
+  double stored = 0;
+  /** Sampling Time */
+  double freq = 1;
 
 };
 

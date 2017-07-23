@@ -29,19 +29,18 @@ public:
     port_signal = NULL;
   }
 
+  /**
+   * Override the = operator
+   */
   Port& operator= (Signal &signal_var) {
     this->port_signal = signal_var.get();
     return *this;
   }
 
-  // void bind(Port * to_bind_port) {
-  //   this = to_bind_port;
-  // }
-
   /**
    * Read the value from the port
    */
-  float read() {
+  double read() {
     if (!check()) {
       return 0;
     }
@@ -52,7 +51,7 @@ public:
   /**
    * Write a value to the port
    */
-  float write(float value) {
+  double write(double value) {
     if (!check()) {
       return 0;
     }
@@ -70,7 +69,7 @@ public:
 
 private:
   /** Port signal */
-  float * port_signal;
+  double * port_signal;
 
 };
 

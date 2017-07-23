@@ -19,100 +19,63 @@
 #include <Zumo32U4.h>
 #endif
 
-#include <PID.h>
-#include <ZumoIMUFilters.h>
-#include <ZumoIMU.h>
-#include <ZumoMotors.h>
-#include <SoftwareSerial.h>
+// Serial commands
+#include <Commands.h>
 
-#define FILTERS 1
+// Debugging utils
+#include <Plotter.h>
+
+// Components
+#include <ZumoSegway.h>
+#include <StateFeedback.h>
+#include <Adder.h>
+
+// Constants
+/** Controll Law */
+const double K[2] = {0.72944, -2.18832};
+/** Sampling period in ms */
+const byte sampling_period = 20;
+/** Initializing Cycles */
+const int init_cycles = 100;
 
 // Needed for starting balancing
 Zumo32U4ButtonA buttonA;
 
 // Components
-PID * pid_controller;
-Adder * error_adder;
-Gain * inv_feedback;
-Limit * lim_output;
-#ifdef FILTERS
-ZumoIMUFilters * imu;
-#else
-ZumoIMU * imu;
-#endif
-ZumoMotors * motors;
+/** Segway Component */
+ZumoSegway * segway;
+/** Full-state feedback component */
+StateFeedback<2, 1> * control_law;
+/** Angle correction adder */
+Adder * angle_corrector;
 
 // Signals
-Signal target_angle;
-Signal pid_out;
-Signal speed;
-Signal feedback;
+/** Angle of the Segway with respect to the perpendicular to the floor */
 Signal angle;
-Signal angle_error;
+/** Angular speed of the Segway */
+Signal angular_speed;
+/** Linear speed of the Segway */
+Signal speed;
+/** Corrected Angle because of the deviation of the center of gravity */
+Signal corrected_angle;
+/** Negative of the angle of the center of gravity */
+Signal center_angle;
 
 // Other variables
-byte sampling_time = 0;
-const byte sampling_period = 20;
-
-// Functions prototypes
-void simulate_circuit();
-void build_circuit();
-
-// Controller buttoms
-const byte B_LEFT    = 48;
-const byte B_UP      = 49;
-const byte B_RIGHT   = 50;
-const byte B_DOWN    = 51;
-const byte B_SELECT  = 52;
-const byte B_START   = 53;
-const byte B_SQUARE  = 54;
-const byte B_TRIAGLE = 55;
-const byte B_CROSS   = 56;
-const byte B_CIRCLE  = 57;
-
-/**
- * Zumo board states
- */
-enum zumo_states_e {
-  /** Initializing state */
-  S_INITIALIZING,
-  /** Balancing state */
-  S_BALANCING,
-  /** Calibrating state */
-  S_CALIBRATING,
-  /** Initializing state */
-  S_MOVING_FORWARD,
-  /** Initializing state */
-  S_MOVING_BACKWARDS,
-};
-
-/** Add/substracted value to move forward/backward */
-const float move_angle = 1;
-/** Initializing Cycles */
-const int init_cycles = 100;
-/** Oscilation period (Experimentally obtained) */
-const float t_cr = 0.150;
-/** Proportional gain till oscilation */
-const float k_cr = 55;
-/** Proportional gain */
-const float P = 0.6 * k_cr;
-/** Integral gain */
-const float I = 1 / (0.5 * t_cr);
-/** Derivative gain */
-const float D = 1 / (0.125 * t_cr);
-
+/** Last sampled time */
+byte last_sampled_time = 0;
 /** Serial received character */
 char c = ' ';
-/** Calibrated Target Angle */
-#ifndef FILTERS
-float calibrated_target_angle = -2;
-#else
-float calibrated_target_angle = -1.4;
-#endif
 /** Current state */
 zumo_states_e curr_state = S_INITIALIZING;
 /** Initializing cycles init_cycle_count */
 int init_cycle_count;
+/** Serial Plotter */
+Plotter * plotter;
+
+// Functions prototypes
+void simulate_circuit();
+void build_circuit();
 
 /**
  * Setup function
@@ -121,45 +84,35 @@ void setup() {
 
   Wire.begin();
   delay(500);
-  Serial1.begin(115200);
+  Serial.begin(115200);
+  plotter = new Plotter(&Serial);
   delay(1000);
 
-  target_angle = calibrated_target_angle;
+  plotter->config_plot(0, "title:{Current Time}");
 
   // Create zumo components
-  #ifdef FILTERS
-  imu = new ZumoIMUFilters();
-  #else
-  imu = new ZumoIMU();
-  #endif
-  motors = new ZumoMotors();
+  segway = new ZumoSegway();
+  control_law = new StateFeedback<2, 1>(K);
+  angle_corrector = new Adder();
 
-  // Compensate the deviation seen during experiments
-  motors->dead_zone = 0;
+  center_angle = -2;
 
-  // Send PID values
-  Plotter::info("P", P);
-  Plotter::info("I", I);
-  Plotter::info("D", D);
+  plotter->info("K[0]", K[0]);
+  plotter->info("K[1]", K[1]);
+  plotter->info("Target Angle", center_angle.read());
 
   // Configure the plots
-  Plotter::config_plot(0, "title:{Current Time}");
-  Plotter::config_plot(0, "period:{20}");
+  plotter->config_plot(0, "title:{Current Time}");
+  plotter->config_plot(0, "period:{20}");
 
-  Plotter::config_plot(1, "title:{Sampling Period}");
-  Plotter::config_plot(0, "period:{20}");
+  plotter->config_plot(1, "title:{Sampling Period}");
+  plotter->config_plot(1, "period:{20}");
 
-  Plotter::config_plot(2, "title:{Target Value}");
-  Plotter::config_plot(0, "period:{20}");
+  plotter->config_plot(2, "title:{Angle}");
+  plotter->config_plot(2, "period:{20}");
 
-  Plotter::config_plot(3, "title:{Angle}");
-  Plotter::config_plot(0, "period:{20}");
-
-  // Create all components. Values taken from Zumo balancing example
-  pid_controller = new PID(P, I, D, -40, 40);
-  error_adder = new Adder();
-  inv_feedback = new Gain(-1);
-  lim_output = new Limit(-400, 400);
+  plotter->config_plot(3, "title:{Speed}");
+  plotter->config_plot(3, "period:{20}");
 
   // Build the circuit connecting all components together
   build_circuit();
@@ -180,7 +133,7 @@ void setup() {
   // Init the counter
   init_cycle_count = 0;
 
-  Plotter::info("Initializing State");
+  plotter->info("Initializing State");
   curr_state = S_INITIALIZING;
 }
 
@@ -200,38 +153,35 @@ void loop() {
       // Change state once the amount of cycles have been reached
       if (init_cycle_count > init_cycles) {
         curr_state = S_BALANCING;
-        Plotter::info("Balacing State");
+        plotter->info("Balacing State");
         speed = 0;
       }
 
       break;
     case S_BALANCING:
       // Update the target angle
-      target_angle = calibrated_target_angle;
       ledYellow(false);
 
       switch (c) {
         case B_SELECT: // Start calibrating state
           curr_state = S_CALIBRATING;
-          Plotter::info("Calibration State");
+          plotter->info("Calibration State");
           break;
         case B_UP: // Start moving foward
           curr_state = S_MOVING_FORWARD;
-          Plotter::info("Moving Forward State");
-          target_angle = calibrated_target_angle - move_angle;
+          plotter->info("Moving Forward State");
           break;
         case B_DOWN: // Start moving backwards
           curr_state = S_MOVING_BACKWARDS;
-          Plotter::info("Moving Backwards State");
-          target_angle = calibrated_target_angle + move_angle;
+          plotter->info("Moving Backwards State");
           break;
         case B_TRIAGLE:
           curr_state = S_BALANCING;
-          Plotter::info("Balancing State");
+          plotter->info("Balancing State");
           break;
         case B_CROSS:
           curr_state = S_BALANCING;
-          Plotter::info("Balancing State");
+          plotter->info("Balancing State");
           break;
         default:
           break;
@@ -245,45 +195,19 @@ void loop() {
         case B_SELECT: // Exit calibrating state
           curr_state = S_BALANCING;
           break;
-        case B_UP:
-          calibrated_target_angle -= 0.1;
-          target_angle = calibrated_target_angle;
-          break;
-        case B_DOWN:
-          calibrated_target_angle += 0.1;
-          target_angle = calibrated_target_angle;
-          break;
-        case B_LEFT:
-          if (motors->right_scale == 1) {
-            motors->left_scale -= 0.01;
-          } else {
-            motors->right_scale += 0.01;
-          }
-
-          break;
-        case B_RIGHT:
-          if (motors->left_scale == 1) {
-            motors->right_scale -= 0.01;
-          } else {
-            motors->left_scale += 0.01;
-          }
-          break;
         default:
           break;
       }
       break;
     case S_MOVING_FORWARD:
       if (c == B_DOWN) {
-        target_angle = calibrated_target_angle;
         curr_state = S_BALANCING;
       }
     case S_MOVING_BACKWARDS:
       if (c == B_UP) {
-        target_angle = calibrated_target_angle;
         curr_state = S_BALANCING;
       }
       if (c == B_START) {
-        target_angle = calibrated_target_angle;
         curr_state = S_BALANCING;
       }
       ledYellow(false);
@@ -293,25 +217,16 @@ void loop() {
       break;
   }
 
-  #ifndef FILTERS
-    imu->updateAngleGyro();
-  #endif
-
     // Sampling period is sampling_period
   byte current_time = millis();
-  if ((byte)(current_time - sampling_time) >= sampling_period) {
+  if ((byte)(current_time - last_sampled_time) >= sampling_period) {
     // Current Time
-    Plotter::plot(0, current_time);
+    plotter->plot(0, current_time);
 
     // Sampling period
-    Plotter::plot(1, (byte)(current_time - sampling_time));
+    plotter->plot(1, (byte)(current_time - last_sampled_time));
 
-    // Target Angle
-    Plotter::plot(2, target_angle.read());
-
-    Serial.println();
-
-    sampling_time = current_time;
+    last_sampled_time = current_time;
     simulate_circuit();
   }
 }
@@ -320,58 +235,42 @@ void loop() {
  * Simluate the entire circuit
  */
 void simulate_circuit() {
-  // IMU simulation doesn't depend on angle
-  imu->simulate();
-
-  Plotter::plot(3, angle.read());
-  Serial.println(angle.read());
-
   if (curr_state == S_INITIALIZING) {
     init_cycle_count++;
     return;
   }
 
-  // Have all simulation inside if to prevent  accumulating error when
-  // angle > 45
-  if (abs(angle.read()) > 45) {
-    speed = 0;
-    Plotter::info("Angle greater than 45");
-  } else {
-    inv_feedback->simulate();
-    error_adder->simulate();
-    pid_controller->simulate();
-    lim_output->simulate();
-  }
+  // IMU simulation doesn't depend on angle
+  angle_corrector->simulate();
+  segway->simulate();
+  control_law->simulate();
 
-  motors->simulate();
+  plotter->plot(2, segway->angle.read());
+  plotter->plot(3, segway->speed.read());
 }
 
 /**
  * Build the circuit connecting all components together
  */
 void build_circuit() {
-  imu->out = angle;
+  // Connect Plant's inputs
+  segway->angle = angle;
+  segway->angular_speed = angular_speed;
 
-  // Change sign of the angle
-  inv_feedback->in = angle;
-  inv_feedback->out = feedback;
+  // Connect the error calculator
+  angle_corrector->in_0 = angle;
+  angle_corrector->in_1 = center_angle;
+  angle_corrector->out = corrected_angle;
 
-  // Error calculator
-  error_adder->in_0 = target_angle;
-  error_adder->in_1 = feedback;
-  error_adder->out = angle_error;
+  // Connect Control Law input
+  control_law->in[0] = corrected_angle;
+  control_law->in[1] = angular_speed;
 
-  // PID controller
-  pid_controller->in = angle_error;
-  pid_controller->out = pid_out;
+  // Connect Control Law output
+  control_law->out[0] = speed;
 
-  // Limit the PID output
-  lim_output->in = pid_out;
-  lim_output->out = speed;
-
-  // Set motor speed
-  motors->left_speed = speed;
-  motors->right_speed = speed;
+  // Connect Plant's output
+  segway->speed = speed;
 }
 
 #endif
