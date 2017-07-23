@@ -19,10 +19,13 @@
 #include <Zumo32U4.h>
 #endif
 
-// Include debugging utils
+// Serial commands
+#include <Commands.h>
+
+// Debugging utils
 #include <Plotter.h>
 
-// Include components
+// Components
 #include <ZumoSegway.h>
 #include <StateFeedback.h>
 #include <Adder.h>
@@ -35,15 +38,16 @@ const byte sampling_period = 20;
 /** Initializing Cycles */
 const int init_cycles = 100;
 
-
-
 // Needed for starting balancing
 Zumo32U4ButtonA buttonA;
 
 // Components
+/** Segway Component */
 ZumoSegway * segway;
+/** Full-state feedback component */
 StateFeedback<2, 1> * control_law;
-Adder * error_calc;
+/** Angle correction adder */
+Adder * angle_corrector;
 
 // Signals
 /** Angle of the Segway with respect to the perpendicular to the floor */
@@ -56,7 +60,6 @@ Signal speed;
 Signal corrected_angle;
 /** Negative of the angle of the center of gravity */
 Signal center_angle;
-
 
 // Other variables
 /** Last sampled time */
@@ -74,34 +77,6 @@ Plotter * plotter;
 void simulate_circuit();
 void build_circuit();
 
-// Controller buttoms
-const byte B_LEFT    = 48;
-const byte B_UP      = 49;
-const byte B_RIGHT   = 50;
-const byte B_DOWN    = 51;
-const byte B_SELECT  = 52;
-const byte B_START   = 53;
-const byte B_SQUARE  = 54;
-const byte B_TRIAGLE = 55;
-const byte B_CROSS   = 56;
-const byte B_CIRCLE  = 57;
-
-/**
- * Zumo board states
- */
-enum zumo_states_e {
-  /** Initializing state */
-  S_INITIALIZING,
-  /** Balancing state */
-  S_BALANCING,
-  /** Calibrating state */
-  S_CALIBRATING,
-  /** Initializing state */
-  S_MOVING_FORWARD,
-  /** Initializing state */
-  S_MOVING_BACKWARDS,
-};
-
 /**
  * Setup function
  */
@@ -118,7 +93,7 @@ void setup() {
   // Create zumo components
   segway = new ZumoSegway();
   control_law = new StateFeedback<2, 1>(K);
-  error_calc = new Adder();
+  angle_corrector = new Adder();
 
   center_angle = -2;
 
@@ -266,7 +241,7 @@ void simulate_circuit() {
   }
 
   // IMU simulation doesn't depend on angle
-  error_calc->simulate();
+  angle_corrector->simulate();
   segway->simulate();
   control_law->simulate();
 
@@ -283,9 +258,9 @@ void build_circuit() {
   segway->angular_speed = angular_speed;
 
   // Connect the error calculator
-  error_calc->in_0 = angle;
-  error_calc->in_1 = center_angle;
-  error_calc->out = corrected_angle;
+  angle_corrector->in_0 = angle;
+  angle_corrector->in_1 = center_angle;
+  angle_corrector->out = corrected_angle;
 
   // Connect Control Law input
   control_law->in[0] = corrected_angle;

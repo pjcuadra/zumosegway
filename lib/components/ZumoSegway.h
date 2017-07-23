@@ -24,6 +24,22 @@
 #include<ZumoIMUFilters.h>
 
 /**
+ * Zumo board states
+ */
+enum zumo_states_e {
+  /** Initializing state */
+  S_INITIALIZING,
+  /** Balancing state */
+  S_BALANCING,
+  /** Calibrating state */
+  S_CALIBRATING,
+  /** Initializing state */
+  S_MOVING_FORWARD,
+  /** Initializing state */
+  S_MOVING_BACKWARDS,
+};
+
+/**
  * Signal Class
  */
 class ZumoSegway: public Component {
