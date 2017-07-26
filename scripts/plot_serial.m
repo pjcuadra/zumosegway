@@ -67,10 +67,6 @@ try
       count{fig_num} = 0;
     endif
 
-    if (fig_num != 4)
-       continue;
-    endif
-
     count{fig_num}++;
     curr_value_idx = size(t{fig_num})(2) + 1;
 

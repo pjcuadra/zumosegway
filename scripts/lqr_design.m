@@ -2,17 +2,20 @@ clear;
 clc;
 
 pkg load control
-pkg load symbolic
-
-p0 = -i;
-p1 = i;
 
 % Get the model
-[model] = get_statemodel()
+[plant, model] = get_model()
+
+% Number of states 
+n_states = size(model.a)(1);
+max_acc = 10;
+max_aceptable_angle = pi*5/180;
+max_aceptable_omega = pi*2/180;
+rho = 1;
 
 % Check controlability
 co =  ctrb(model);
-if (det(co) == 0)
+if (rank(co) != n_states)
   disp(" -> Error! System isn't controllable");
   return;
 else
@@ -20,21 +23,33 @@ else
 endif
 
 ob = obsv(model);
-if (det(ob) == 0)
+if (rank(ob) != n_states)
   disp(" -> Error! System isn't observable");
   return;
 else
   disp(" -> Great! System is observable");
 endif
 
-% Get the control law
-syms s;
-q_k = (s - p0)*(s - p1);
-K = double(expand([0 1]*inv(co)*subs(q_k, model.a)))
+Q(1,1) = 1;
+Q(2,2) = 0.5;
+Q = model.c'*model.c
 
-% Get L
-syms s;
-q_l = (s - p0)*(s - p1);
-L = double(subs(q_k, model.a)*inv(ob)*[0; 1])
+R = 1/(max_acc^2);
+R = rho*R;
+R = 1
 
+
+[K, X, L] = lqr(model, Q, R);
+
+disp("Control Law")
+K
+
+disp("Ricatti Solution")
+X
+
+disp("Closed-Loop poles")
+L
+
+clf;
+impulse(feedback(model, K))
 

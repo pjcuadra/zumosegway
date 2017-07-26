@@ -14,6 +14,11 @@
 #ifndef INTEGRAL_H_
 #define INTEGRAL_H_
 
+#ifdef ARDUINO
+#include <Arduino.h>
+#include <Zumo32U4.h>
+#endif
+
 #include<Component.h>
 #include<Limit.h>
 
@@ -33,31 +38,42 @@ public:
    * @param upper upper saturation limit
    * @param freq sampling frequency
    */
-  Integral(double lower, double upper, double freq) : lim(lower, upper){
-    lim.in = stored;
-    lim.out = s_out;
+  Integral(double lower, double upper, double freq) {
+    this->lower = lower;
+    this->upper = upper;
     this->freq = freq;
+
+    x_1 = 0;
+    y_1 = 0;
   }
 
   /**
    * Simulate the circuit component
    */
   inline double simulate() {
-    this->stored += in.read();
-    lim.simulate();
-    this->stored = s_out.read();
-    return out.write(s_out.read() / freq);
+    // double tmp = y_1 + (in.read() + x_1) / (2 *  freq);
+    double tmp = constrain(y_1 + in.read(), lower, upper);
+
+    /*
+     * Discrete integrator
+     * y(k) = y(k - 1) + (x(k) + x(k - 1)) * Ts / 2
+     */
+
+    // Update stored states
+    y_1 = tmp;
+
+    return out.write(tmp);
   }
 
 private:
-  /** Internal store signal */
-  Signal stored;
-  /** Output limit signal */
-  Signal s_out;
   /** Limit circuit component */
-  Limit lim;
+  double lower;
+  double upper;
   /** Sampling frequency */
   double freq;
+
+  double x_1;
+  double y_1;
 };
 
 #endif

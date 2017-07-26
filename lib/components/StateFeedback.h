@@ -55,7 +55,7 @@ template<int num_states, int num_inputs>
 
         // Perform vector multiplication
         for (int j = 0; j < num_states; j++){
-          tmp_out -= in[j].read() * K[j];
+          tmp_out += in[j].read() * K[j];
         }
 
         out[i].write(tmp_out);

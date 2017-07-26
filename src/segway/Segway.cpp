@@ -11,6 +11,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
+#ifdef SEGWAY
+
 #ifndef UNIT_TEST
 
 #ifdef ARDUINO
@@ -19,8 +21,9 @@
 #include <Zumo32U4.h>
 #endif
 
-// Serial commands
+// Misc.
 #include <Commands.h>
+#include <Util.h>
 
 // Debugging utils
 #include <Plotter.h>
@@ -32,9 +35,11 @@
 
 // Constants
 /** Controll Law */
-const double K[2] = {0.72944, -2.18832};
+double K[2] = {-364.70, -287.38};
 /** Sampling period in ms */
 const byte sampling_period = 20;
+/** Sampling frequency */
+const double sampling_freq = 1 / ((double) sampling_period / 1000.0);
 /** Initializing Cycles */
 const int init_cycles = 100;
 
@@ -48,6 +53,8 @@ ZumoSegway * segway;
 StateFeedback<2, 1> * control_law;
 /** Angle correction adder */
 Adder * angle_corrector;
+/** Integrator to convert to speed */
+Integral * integrator;
 
 // Signals
 /** Angle of the Segway with respect to the perpendicular to the floor */
@@ -56,6 +63,8 @@ Signal angle;
 Signal angular_speed;
 /** Linear speed of the Segway */
 Signal speed;
+/** Linear acceleration of the Segway */
+Signal acceleration;
 /** Corrected Angle because of the deviation of the center of gravity */
 Signal corrected_angle;
 /** Negative of the angle of the center of gravity */
@@ -89,17 +98,22 @@ void setup() {
   delay(1000);
 
   plotter->config_plot(0, "title:{Current Time}");
+  const float a = 1;
+  K[0] = a*K[0];
+  K[1] = a*K[1];
 
   // Create zumo components
   segway = new ZumoSegway();
   control_law = new StateFeedback<2, 1>(K);
   angle_corrector = new Adder();
+  integrator = new Integral(-400, 400, sampling_freq);
 
-  center_angle = -2;
+  center_angle = DEG2RAD(-2);
 
   plotter->info("K[0]", K[0]);
   plotter->info("K[1]", K[1]);
   plotter->info("Target Angle", center_angle.read());
+  plotter->info("Sampling Frequency", sampling_freq);
 
   // Configure the plots
   plotter->config_plot(0, "title:{Current Time}");
@@ -111,8 +125,14 @@ void setup() {
   plotter->config_plot(2, "title:{Angle}");
   plotter->config_plot(2, "period:{20}");
 
-  plotter->config_plot(3, "title:{Speed}");
+  plotter->config_plot(3, "title:{Angular Speed}");
   plotter->config_plot(3, "period:{20}");
+
+  plotter->config_plot(3, "title:{Linear Acceleration}");
+  plotter->config_plot(3, "period:{20}");
+
+  plotter->config_plot(4, "title:{Speed}");
+  plotter->config_plot(4, "period:{20}");
 
   // Build the circuit connecting all components together
   build_circuit();
@@ -241,12 +261,18 @@ void simulate_circuit() {
   }
 
   // IMU simulation doesn't depend on angle
-  angle_corrector->simulate();
   segway->simulate();
+  //angle = 5;
+  // angular_speed = 0;
+  angle_corrector->simulate();
   control_law->simulate();
+  integrator->simulate();
+  segway->motor();
 
-  plotter->plot(2, segway->angle.read());
-  plotter->plot(3, segway->speed.read());
+  plotter->plot(2, RAD2DEG(corrected_angle.read()));
+  plotter->plot(3, RAD2DEG(segway->angular_speed.read()));
+  plotter->plot(4, acceleration.read());
+  plotter->plot(5, speed.read());
 }
 
 /**
@@ -267,10 +293,14 @@ void build_circuit() {
   control_law->in[1] = angular_speed;
 
   // Connect Control Law output
-  control_law->out[0] = speed;
+  control_law->out[0] = acceleration;
+
+  integrator->in = acceleration;
+  integrator->out = speed;
 
   // Connect Plant's output
   segway->speed = speed;
 }
 
+#endif
 #endif

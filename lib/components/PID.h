@@ -55,8 +55,8 @@ public:
     this->lower_limit = lower_limit;
     this->upper_limit = upper_limit;
 
-    a = (P + I/(2 * freq) + D * freq);
-    b = (-P + I/(2 * freq) - 2 * freq * D);
+    a = (P + I/((double)2 * freq) + D * freq);
+    b = (-P + I/((double)2 * freq) - 2 * freq * D);
     c = D * freq;
 
     u_1 = 0;

@@ -19,9 +19,11 @@
 #include <Zumo32U4.h>
 #endif
 
+
 #include<Component.h>
 #include<ZumoMotors.h>
 #include<ZumoIMUFilters.h>
+#include<Util.h>
 
 /**
  * Zumo board states
@@ -59,13 +61,13 @@ public:
     imu = new ZumoIMUFilters();
 
     // Connect actuator
-    motors->left_speed = speed;
-    motors->right_speed = speed;
-    motors->dead_zone = 45;
+    motors->left_speed = speed_s;
+    motors->right_speed = speed_s;
+    motors->dead_zone = 25;
 
     // Connect sensors
-    imu->angle_out = angle;
-    imu->angular_speed_out = angular_speed;
+    imu->angle_out = angle_s;
+    imu->angular_speed_out = angular_speed_s;
   }
 
   /**
@@ -73,17 +75,27 @@ public:
    */
   inline double simulate() {
 
-    motors->simulate();
-
-    // Set speed to 0 if angle is over 45 for safety
-    if (abs(angle.read()) > 45) {
-      speed.write(0.0);
-      return 0;
-    }
-
+    speed_s.write(speed.read());
     imu->simulate();
 
+
+  }
+
+  inline double motor() {
+
+    angle.write(angle_s.read());
+    angular_speed.write(angular_speed_s.read());
+
+    // Set speed to 0 if angle is over 45 for safety
+    if (abs(angle.read()) > DEG2RAD(45)) {
+      speed_s.write(0.0);
+      motors->simulate();
+    }
+
+    motors->simulate();
+
     return 0;
+
   }
 
 private:
@@ -91,6 +103,11 @@ private:
   ZumoMotors * motors;
   /** Zumo IMU */
   ZumoIMUFilters * imu;
+
+  Signal angle_s;
+  Signal angular_speed_s;
+  Signal speed_s;
+
 };
 
 #endif

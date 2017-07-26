@@ -79,7 +79,7 @@ public:
 
 
     // Set scale, corrected and rotating speeds
-    motors.setSpeeds(left, right);
+    motors.setSpeeds(constrain(left, -400, 400), constrain(right, -400, 400));
     return 0;
   }
 

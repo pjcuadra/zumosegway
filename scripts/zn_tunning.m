@@ -4,7 +4,7 @@ clc;
 % Load needed packages
 pkg load control
 
-graphics_toolkit("gnuplot") 
+graphics_toolkit("gnuplot")
 
 % Measurements
 oscilations_count = 12.5;
@@ -25,7 +25,20 @@ f0 = 1 / T0
 disp("========================================================================")
 disp(" Plant")
 disp("========================================================================")
-[plant, servo] = get_plant()
+% Add the transfer function
+%          Angle
+%  H(s) = ---------------------
+%          Linear acceleration    
+[plant, model] = get_plant();
+% Add the transfer function
+%          Linear acceleration     s
+%  H(s) = --------------------- = ---
+%          Linear speed            1
+plant = tf([1 0], [1])*plant
+% Now the plant is
+%          Angle
+%  H(s) = --------------
+%          Linear speed
 
 disp("========================================================================")
 disp(" PID Tight")
@@ -37,7 +50,8 @@ K_d = T0 * K_p  / 8
 pid_c = pid(K_p, K_i, K_d);
 
 subplot(plots_row, plots_col, 1);
-impulse(feedback(pid_c*plant))
+feedback(pid_c*plant, tf(-1))
+impulse(pid_c*plant/(1+pid_c*plant))
 title ("Step Response - PID Tight");
 
 disp("========================================================================")
@@ -50,7 +64,7 @@ K_d = K_p * T0 / 3
 pid_c = pid(K_p, K_i, K_d);
 
 subplot(plots_row, plots_col, 2);
-impulse(feedback(pid_c*plant))
+impulse(pid_c*plant/(1+pid_c*plant))
 title ("Step Response - PID (someovershoot)");
 
 disp("========================================================================")
@@ -63,7 +77,7 @@ K_d = K_p * T0 / 2
 pid_c = pid(K_p, K_i, K_d);
 
 subplot(plots_row, plots_col, 3);
-impulse(feedback(pid_c*plant))
+impulse(feedback(pid_c*plant, 1))
 title ("Step Response - PID (No Overshot)");
 
 disp("========================================================================")
