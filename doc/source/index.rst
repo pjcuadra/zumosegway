@@ -12,6 +12,8 @@ Contents:
    :maxdepth: 2
 
    model/index.rst
+   imu/index.rst
+   component_framework/index.rst
 
 Indices and tables
 ==================
