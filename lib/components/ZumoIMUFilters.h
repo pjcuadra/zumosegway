@@ -56,7 +56,7 @@ public:
     aAngle = 0;
 
     butter_lp_5_hz = new Filter<3>(b_lp_5_hz, a_lp_5_hz);
-    butter_hp_5_hz = new Filter<3>(b_hp_5_hz, a_hp_5_hz);
+    butter_hp_5_hz = new Filter<6>(b_hp_5_hz, a_hp_5_hz);
 
     butter_lp_5_hz->in = aAngle;
     butter_lp_5_hz->out = angle_s;
@@ -64,35 +64,6 @@ public:
     butter_hp_5_hz->in = gyAngle;
     butter_hp_5_hz->out = angular_speed_s;
 
-    calibrate();
-
-  }
-
-  /**
-   * Calibrate Gyro
-   */
-  void calibrate() {
-    ledYellow(1);
-
-    // Delay to give the user time to remove their finger.
-    delay(500);
-
-    gyroOffsetY = 0;
-
-    // Calibrate the gyro.
-    for (uint16_t i = 0; i < 1024; i++) {
-      // Wait for new data to be available, then read it.
-      while(!gyro.readReg(L3G::STATUS_REG) & 0x08);
-      gyro.read();
-
-      // Add the Y axis reading to the total.
-      gyroOffsetY += gyro.g.y;
-    }
-
-    gyroOffsetY /= 1024;
-
-    lcd.clear();
-    ledYellow(0);
   }
 
   /**
@@ -114,7 +85,7 @@ public:
     // Calculate how much the angle has changed, in degrees, and
     // add it to our estimation of the current angle.  The gyro's
     // sensitivity is 0.07 dps per digit.
-    gyAngle.write(DEG2RAD(((double)-gyro.g.y) * 0.07));
+    gyAngle.write(DEG2RAD(((double) - gyro.g.y) * 0.07));
   }
 
   /**
@@ -151,7 +122,7 @@ private:
   /** Low-pass filter for accelerometer */
   Filter<3> * butter_lp_5_hz;
   /** High-pass filter for gyro */
-  Filter<3> * butter_hp_5_hz;
+  Filter<6> * butter_hp_5_hz;
   /** B coefficients for Low-pass filter (f_c = 5 Hz / f_s = 50 Hz) */
   const double b_lp_5_hz[4] = {0.0028982, 0.0086946, 0.0086946, 0.0028982};
   // const double b_lp_5_hz[4] = {1, 0, 0, 0};
@@ -159,10 +130,10 @@ private:
   const double a_lp_5_hz[4] = {1.00000, -2.37409, 1.92936, -0.53208};
   // const double a_lp_5_hz[4] = {1, 0, 0, 0};
   /** B coefficients for High-pass filter (f_c = 5 Hz / f_s = 50 Hz) */
-  const double b_hp_5_hz[4] = {0.72944, -2.18832,  2.18832, -0.72944};
+  const double b_hp_5_hz[7] = {0.0006993, 0, -0.0020980, 0, 0.0020980, 0, -0.0006993};
   // const double b_hp_5_hz[4] = {1, 0, 0, 0};
   /** A coefficients for High-pass filter (f_c = 5 Hz / f_s = 50 Hz) */
-  const double a_hp_5_hz[4] = {1.00000, -2.37409,  1.92936, -0.53208};
+  const double a_hp_5_hz[7] = {1, -5.18405, 11.59895, -14.29354, 10.22591, -4.02966, 0.68554};
   // const double a_lp_5_hz[4] = {1, 0, 0, 0};
   /** Angle output port */
   Signal angle_s;

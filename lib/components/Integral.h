@@ -51,8 +51,7 @@ public:
    * Simulate the circuit component
    */
   inline double simulate() {
-    // double tmp = y_1 + (in.read() + x_1) / (2 *  freq);
-    double tmp = constrain(y_1 + in.read(), lower, upper);
+    double tmp = y_1 + (in.read() + x_1) / (2 *  freq);
 
     /*
      * Discrete integrator
@@ -60,9 +59,10 @@ public:
      */
 
     // Update stored states
-    y_1 = tmp;
+    y_1 = constrain(tmp, lower, upper);
+    x_1 = in.read();
 
-    return out.write(tmp);
+    return out.write(y_1);
   }
 
 private:

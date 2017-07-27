@@ -96,11 +96,11 @@ private:
   /** Sampling Frequency */
   double freq;
   /** P parameterer of controller */
-  const double P = 10 / (2 * _PI);
+  const double P = 20;
   /** I parameterer of controller */
-  const double I = (freq * freq) / (2 * _PI);
+  const double I = 200;
   /** D parameterer of controller */
-  const double D = 1 / (2 * _PI * (freq * freq));
+  const double D = 0;
   /** Zumo 100:1 motor gear ratio */
   const double gear_ratio = 100.37;
   /** Encoder count to cycle convertion constant */

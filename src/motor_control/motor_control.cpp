@@ -11,6 +11,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
+#ifdef MOTOR_CONTROL
+
 #ifndef UNIT_TEST
 
 #ifdef ARDUINO
@@ -143,4 +145,5 @@ void build_circuit() {
   motors->speed = speed;
 }
 
+#endif
 #endif

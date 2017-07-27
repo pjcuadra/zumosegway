@@ -3,12 +3,14 @@ clc;
 
 pkg load control
 
+load_physical_constants
+
 % Get the model
 [plant, model] = get_model()
 
 % Number of states 
 n_states = size(model.a)(1);
-max_acc = 10;
+max_acc = motor_out_max*r_w;
 max_aceptable_angle = pi*5/180;
 max_aceptable_omega = pi*2/180;
 rho = 1;
@@ -30,12 +32,11 @@ else
   disp(" -> Great! System is observable");
 endif
 
-Q(1,1) = 1;
-Q(2,2) = 0.5;
-Q = model.c'*model.c
+Q(1,1) = 10;
+Q(2,2) = 1;
+Q
 
 R = 1/(max_acc^2);
-R = rho*R;
 R = 1
 
 

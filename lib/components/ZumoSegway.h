@@ -21,7 +21,7 @@
 
 
 #include<Component.h>
-#include<ZumoMotors.h>
+#include<ZumoControlledMotors.h>
 #include<ZumoIMUFilters.h>
 #include<Util.h>
 
@@ -54,16 +54,17 @@ public:
   Port angular_speed;
 
   /**
-   *  Constructors
+   * Constructors
+   * @param freq sampling frequency
    */
-  ZumoSegway() {
-    motors = new ZumoMotors();
+  ZumoSegway(double freq) {
+    motors = new ZumoControlledMotors(freq);
     imu = new ZumoIMUFilters();
 
+    this->freq = freq;
+
     // Connect actuator
-    motors->left_speed = speed_s;
-    motors->right_speed = speed_s;
-    motors->dead_zone = 25;
+    motors->speed = speed_s;
 
     // Connect sensors
     imu->angle_out = angle_s;
@@ -100,9 +101,10 @@ public:
 
 private:
   /** Zumo motors */
-  ZumoMotors * motors;
+  ZumoControlledMotors * motors;
   /** Zumo IMU */
   ZumoIMUFilters * imu;
+  double freq;
 
   Signal angle_s;
   Signal angular_speed_s;

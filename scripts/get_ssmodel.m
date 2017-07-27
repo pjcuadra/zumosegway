@@ -7,7 +7,7 @@ function model = get_ssmodel()
   load_physical_constants
            
   A = [0 1; g/l 0];
-  B = [0; -K_s/l];
+  B = [0; -l];
   C = [1 0; 0 1];
   D = [0; 0];
   

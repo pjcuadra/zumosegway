@@ -7,6 +7,6 @@ function plant = get_tf()
   load_physical_constants
   
   % Create the system for the plant
-  plant = tf([-K_s], [l 0 -g]);
+  plant = tf([-1], [l 0 -g]);
 
 endfunction

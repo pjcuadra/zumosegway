@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-#ifdef SEGWAY
+// #ifdef SEGWAY
 
 #ifndef UNIT_TEST
 
@@ -35,7 +35,7 @@
 
 // Constants
 /** Controll Law */
-double K[2] = {-364.70, -287.38};
+double K[2] = {-10965, -720.04};
 /** Sampling period in ms */
 const byte sampling_period = 20;
 /** Sampling frequency */
@@ -103,7 +103,7 @@ void setup() {
   K[1] = a*K[1];
 
   // Create zumo components
-  segway = new ZumoSegway();
+  segway = new ZumoSegway(sampling_freq);
   control_law = new StateFeedback<2, 1>(K);
   angle_corrector = new Adder();
   integrator = new Integral(-400, 400, sampling_freq);
@@ -303,4 +303,4 @@ void build_circuit() {
 }
 
 #endif
-#endif
+// #endif
