@@ -1,22 +1,36 @@
 function line = srl_read_line(s1)
 
   line = "";
+   
+  % Get start time
+  t = clock();
+    
+  % Initialize with dummy value
+  c = 0;
   
-  try
-    c = srl_read(s1, 1);
-    while (c != 10)    
-      line = cstrcat(line, char(c));
-      c = srl_read(s1, 1);
+  while(1)    
+    [c, read_char] = srl_read(s1, 1);
+    
+    % If no character was read retry
+    if (read_char == 0)
+      error("Timeout reading character");
+      continue;
+    endif
+    
+    % Throw error if over 2 secons are waited
+    if (etime(clock(), t) >= 1)
+      error("Timeout reading line");
+      return;
+    endif
       
-      k = kbhit (1);
-      
-      if (k == 'x')
-        break;
-      endif
-      
-    endwhile    
-  catch
-    return;
-  end_try_catch
+    
+    % End while line break
+    if (c == 10) 
+      break;
+    endif
+    
+    line = cstrcat(line, char(c));
+          
+  endwhile    
 
 endfunction

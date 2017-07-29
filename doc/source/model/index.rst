@@ -270,3 +270,20 @@ The experiment gave us important results listed bellow;
 * :math:`K_s = (0.012 \pm 0.005) m/s` for values from 45 to 400 and from -400
   to -45.
 * :math:`K_s` depends strongly on the batter level.
+
+
+IMU
+***
+
+Complementary Filters
+---------------------
+
+Accelerometer
+=============
+
+Wea asdffnas fdaofjadoifj asdlfasoidfuasf nadlkfj asoi oiodafoiaj sjnaushfdioah
+afausfh 5 Hz and wijaojasoifnaousncouasdfouahsdhj as follows;
+
+.. code::
+
+  [b, a] = butter(3, 5 / f_s);

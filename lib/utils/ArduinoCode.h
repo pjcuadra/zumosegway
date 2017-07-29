@@ -10,43 +10,47 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License. */
-#ifndef ADDER_H_
-#define ADDER_H_
 
-#include<Component.h>
+#ifndef ARDUINOCODE_H_
+#define ARDUINOCODE_H_
 
-/**
- * Adder Component
- */
-class Adder: public Component {
+#ifdef ARDUINO
+#include <Arduino.h>
+#include <Wire.h>
+#include <Zumo32U4.h>
+#endif
+
+#include <Plotter.h>
+
+
+class ArduinoCode {
 public:
-  /** Input port 0 */
-  Port in_0;
-  /** Input port 1 */
-  Port in_1;
-  /** Output port */
-  Port out;
+  /** Serial Plotter */
+  Plotter * plotter;
+  /** Last sampled time */
+  byte last_sampled_time = 0;
 
-  Adder(double in_0_gain, double in_1_gain) :
-    in_0_gain(in_0_gain),
-    in_1_gain(in_1_gain) {
-    // Do nothing
+  ArduinoCode() {
+    Wire.begin();
+    delay(500);
+    Serial.begin(115200);
+    plotter = new Plotter(&Serial);
+    delay(1000);
   }
 
-  Adder() : in_0_gain(1), in_1_gain(1) {
-    // Do nothing
-  }
+  /** Arduino's loop function */
+  virtual void loop() {
+    // Nothing to do
+  };
 
-  /**
-   * Simulate the circuit component
-   */
-  inline double simulate() {
-    return out.write(in_0_gain*in_0.read() + in_1_gain*in_1.read());
+  /** Arduino's setup function*/
+  virtual void setup() {
+    // Nothing to do
   }
 
 private:
-  const double in_0_gain;
-  const double in_1_gain;
+
+
 };
 
 #endif

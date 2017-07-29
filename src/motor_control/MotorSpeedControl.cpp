@@ -11,8 +11,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-#ifdef MOTOR_CONTROL
-
 #ifndef UNIT_TEST
 
 #ifdef ARDUINO
@@ -25,48 +23,12 @@
 #include <Util.h>
 
 // Debugging utils
-#include <Plotter.h>
-
-// Components
-#include <ZumoControlledMotors.h>
-
-// Constants
-/** Sampling period in ms */
-const byte sampling_period = 20;
-/** Sampling frequency */
-const double sampling_freq = 1 / ((double) sampling_period / 1000.0);
-
-// Needed for starting balancing
-Zumo32U4ButtonA buttonA;
-Zumo32U4Encoders encoders;
-
-// Components
-/** Segway Component */
-ZumoControlledMotors * motors;
-
-// Signals
-Signal speed;
-
-// Other variables
-/** Last sampled time */
-byte last_sampled_time = 0;
-/** Serial Plotter */
-Plotter * plotter;
-
-// Functions prototypes
-void simulate_circuit();
-void build_circuit();
+#include <MotorSpeedControl.h>
 
 /**
  * Setup function
  */
-void setup() {
-
-  Wire.begin();
-  delay(500);
-  Serial.begin(115200);
-  plotter = new Plotter(&Serial);
-  delay(1000);
+inline void MotorSpeedControl::setup() {
 
   plotter->config_plot(0, "title:{Current Time}");
 
@@ -89,18 +51,7 @@ void setup() {
   // Build the circuit connecting all components together
   build_circuit();
 
-  // Display the angle until the user presses A.
-  while (!buttonA.getSingleDebouncedRelease()) {
-    // Just wait ;)
-    ledRed(true);
-
-    if (Serial1.available()) {
-      if ('s' == Serial1.read()) {
-        break;
-      }
-    }
-  }
-  ledRed(false);
+  
 
   speed = 2 * _PI;
   encoders.getCountsAndResetLeft();
@@ -110,7 +61,7 @@ void setup() {
 /**
  * Loop function
  */
-void loop() {
+inline void MotorSpeedControl::loop() {
 
     // Sampling period is sampling_period
   byte current_time = millis();
@@ -129,7 +80,7 @@ void loop() {
 /**
  * Simluate the entire circuit
  */
-void simulate_circuit() {
+void MotorSpeedControl::simulate_circuit() {
   motors->simulate();
 
   plotter->plot(2, motors->speed_out.read());
@@ -140,10 +91,9 @@ void simulate_circuit() {
 /**
  * Build the circuit connecting all components together
  */
-void build_circuit() {
+void MotorSpeedControl::build_circuit() {
   // Connect Plant's inputs
   motors->speed = speed;
 }
 
-#endif
 #endif

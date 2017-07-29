@@ -14,10 +14,42 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
+#ifdef ARDUINO
+#include <Arduino.h>
+#endif
+
 #define _PI 3.1416
 #define _DEG2RAD (_PI / 180.0)
 
 #define DEG2RAD(x) x * _DEG2RAD
 #define RAD2DEG(x) x / _DEG2RAD
+
+inline void startup_wait() {
+  // Needed for starting balancing
+  Zumo32U4ButtonA buttonA;
+  // Display the angle until the user presses A.
+  while (!buttonA.getSingleDebouncedRelease()) {
+    // Just wait ;)
+    ledRed(true);
+  }
+  ledRed(false);
+}
+
+inline void startup_wait(Serial_ * serial) {
+  // Needed for starting balancing
+  Zumo32U4ButtonA buttonA;
+  // Display the angle until the user presses A.
+  while (!buttonA.getSingleDebouncedRelease()) {
+    // Just wait ;)
+    ledRed(true);
+
+    if (serial->available()) {
+      if ('s' == serial->read()) {
+        break;
+      }
+    }
+  }
+  ledRed(false);
+}
 
 #endif

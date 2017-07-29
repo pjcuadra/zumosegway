@@ -52,7 +52,7 @@ public:
 
   }
 
-  inline get_encoder_speed() {
+  inline void get_encoder_speed() {
     left_speed = encoders.getCountsAndResetLeft() * 2 * _PI * freq * count2cycle;
     right_speed = encoders.getCountsAndResetRight() * 2 * _PI * freq * count2cycle;
   }
@@ -73,6 +73,8 @@ public:
 
     motors.setLeftSpeed((int16_t) left_pid_out.read());
     motors.setRightSpeed((int16_t) right_pid_out.read());
+
+    return 0;
 
   }
 

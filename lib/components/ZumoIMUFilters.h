@@ -25,11 +25,21 @@ public:
   Port angle_out;
   /** Angular speed output port */
   Port angular_speed_out;
+  /** Combined angle */
+  Port combined_angle_out;
+
+
+  /** Angle read from accelerometer */
+  Signal aAngle;
+  /** Angle output port */
+  Signal angle_s;
+
 
   /**
    * Constructor
    */
-  ZumoIMUFilters() {
+  ZumoIMUFilters(double lower, double upper, double freq) :
+    integral(lower, upper, freq) {
     // Set up the L3GD20H gyro.
     gyro.init();
 
@@ -56,13 +66,16 @@ public:
     aAngle = 0;
 
     butter_lp_5_hz = new Filter<3>(b_lp_5_hz, a_lp_5_hz);
-    butter_hp_5_hz = new Filter<6>(b_hp_5_hz, a_hp_5_hz);
+    butter_hp_5_hz = new Filter<3>(b_hp_5_hz, a_hp_5_hz);
 
     butter_lp_5_hz->in = aAngle;
     butter_lp_5_hz->out = angle_s;
 
     butter_hp_5_hz->in = gyAngle;
     butter_hp_5_hz->out = angular_speed_s;
+
+    integral.in = angular_speed_s;
+    integral.out = integrated_angular_speed_s;
 
   }
 
@@ -85,7 +98,7 @@ public:
     // Calculate how much the angle has changed, in degrees, and
     // add it to our estimation of the current angle.  The gyro's
     // sensitivity is 0.07 dps per digit.
-    gyAngle.write(DEG2RAD(((double) - gyro.g.y) * 0.07));
+    gyAngle.write(DEG2RAD(((double) gyro.g.y) * 0.07));
   }
 
   /**
@@ -102,6 +115,9 @@ public:
     angle_out.write(angle_s.read());
     angular_speed_out.write(angular_speed_s.read());
 
+    integral.simulate();
+    combined_angle_out.write(angle_s.read() + integrated_angular_speed_s.read());
+
     return 0;
   }
 
@@ -115,14 +131,13 @@ private:
   Zumo32U4LCD lcd;
   /** Average reading obtained from the gyro's Y axis during calibration. */
   double gyroOffsetY;
-  /** Angle read from accelerometer */
-  Signal aAngle;
+
   /** Angle rate read from gyro */
   Signal gyAngle;
   /** Low-pass filter for accelerometer */
   Filter<3> * butter_lp_5_hz;
   /** High-pass filter for gyro */
-  Filter<6> * butter_hp_5_hz;
+  Filter<3> * butter_hp_5_hz;
   /** B coefficients for Low-pass filter (f_c = 5 Hz / f_s = 50 Hz) */
   const double b_lp_5_hz[4] = {0.0028982, 0.0086946, 0.0086946, 0.0028982};
   // const double b_lp_5_hz[4] = {1, 0, 0, 0};
@@ -130,15 +145,19 @@ private:
   const double a_lp_5_hz[4] = {1.00000, -2.37409, 1.92936, -0.53208};
   // const double a_lp_5_hz[4] = {1, 0, 0, 0};
   /** B coefficients for High-pass filter (f_c = 5 Hz / f_s = 50 Hz) */
-  const double b_hp_5_hz[7] = {0.0006993, 0, -0.0020980, 0, 0.0020980, 0, -0.0006993};
+  const double b_hp_5_hz[4] = {0.72944, -2.18832, 2.18832, -0.72944};
   // const double b_hp_5_hz[4] = {1, 0, 0, 0};
   /** A coefficients for High-pass filter (f_c = 5 Hz / f_s = 50 Hz) */
-  const double a_hp_5_hz[7] = {1, -5.18405, 11.59895, -14.29354, 10.22591, -4.02966, 0.68554};
+  const double a_hp_5_hz[4] = {1.00000, -2.37409, 1.92936, -0.53208};
   // const double a_lp_5_hz[4] = {1, 0, 0, 0};
-  /** Angle output port */
-  Signal angle_s;
+
   /** Angular speed output port */
   Signal angular_speed_s;
+
+
+
+  Integral integral;
+  Signal integrated_angular_speed_s;
 };
 
 #endif

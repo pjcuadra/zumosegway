@@ -21,7 +21,7 @@
 
 
 #include<Component.h>
-#include<ZumoControlledMotors.h>
+#include<ZumoMotors.h>
 #include<ZumoIMUFilters.h>
 #include<Util.h>
 
@@ -39,6 +39,8 @@ enum zumo_states_e {
   S_MOVING_FORWARD,
   /** Initializing state */
   S_MOVING_BACKWARDS,
+  /** Laying State */
+  S_LAYING,
 };
 
 /**
@@ -52,23 +54,27 @@ public:
   Port angle;
   /** Angular Speed out port */
   Port angular_speed;
+  /** Combined Angle */
+  Port combined_angle;
 
   /**
    * Constructors
    * @param freq sampling frequency
    */
   ZumoSegway(double freq) {
-    motors = new ZumoControlledMotors(freq);
-    imu = new ZumoIMUFilters();
+    motors = new ZumoMotors();
+    imu = new ZumoIMUFilters(-1000, 1000, freq);
 
     this->freq = freq;
 
     // Connect actuator
-    motors->speed = speed_s;
+    motors->left_speed = speed_s;
+    motors->right_speed = speed_s;
 
     // Connect sensors
     imu->angle_out = angle_s;
     imu->angular_speed_out = angular_speed_s;
+    imu->combined_angle_out = combined_angle_s;
   }
 
   /**
@@ -79,35 +85,29 @@ public:
     speed_s.write(speed.read());
     imu->simulate();
 
-
-  }
-
-  inline double motor() {
-
     angle.write(angle_s.read());
     angular_speed.write(angular_speed_s.read());
-
-    // Set speed to 0 if angle is over 45 for safety
-    if (abs(angle.read()) > DEG2RAD(45)) {
-      speed_s.write(0.0);
-      motors->simulate();
-    }
-
-    motors->simulate();
+    combined_angle.write(combined_angle_s.read());
 
     return 0;
 
   }
 
+  inline double motor() {
+    motors->simulate();
+    return 0;
+  }
+
 private:
   /** Zumo motors */
-  ZumoControlledMotors * motors;
+  ZumoMotors * motors;
   /** Zumo IMU */
   ZumoIMUFilters * imu;
   double freq;
 
   Signal angle_s;
   Signal angular_speed_s;
+  Signal combined_angle_s;
   Signal speed_s;
 
 };

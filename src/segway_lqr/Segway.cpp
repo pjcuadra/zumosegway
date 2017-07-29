@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-// #ifdef SEGWAY
+#ifdef SEGWAY
 
 #ifndef UNIT_TEST
 
@@ -35,7 +35,7 @@
 
 // Constants
 /** Controll Law */
-double K[2] = {-10965, -720.04};
+double K[2] = {10965, 720.04};
 /** Sampling period in ms */
 const byte sampling_period = 20;
 /** Sampling frequency */
@@ -303,4 +303,4 @@ void build_circuit() {
 }
 
 #endif
-// #endif
+#endif
