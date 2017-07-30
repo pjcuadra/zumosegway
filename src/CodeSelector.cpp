@@ -11,8 +11,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-// #ifdef SEGWAY
-
 #ifndef UNIT_TEST
 
 #ifdef ARDUINO
@@ -23,24 +21,27 @@
 
 // Misc.
 #include <Commands.h>
-#include <Util.h>
 #include <CodeSelector.h>
 
 // Code Classes
 #include <SegwayPID.h>
+#include <SegwayLQR.h>
 #include <MotorSpeedControl.h>
 #include <IMU.h>
 
 // Code Class pointer
 ArduinoCode * code;
 // Code Class selector
-code_selector_e selector = SEGWAY_PID;
+code_selector_e selector = SEGWAY_LQR;
 
 void setup() {
   // Select the code class to run
   switch (selector) {
     case SEGWAY_PID:
       code = new SegwayPID();
+      break;
+    case SEGWAY_LQR:
+      code = new SegwayLQR();
       break;
     case ZUMOMOTOR_SPEED_PID:
       code = new MotorSpeedControl();

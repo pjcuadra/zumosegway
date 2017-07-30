@@ -32,30 +32,22 @@ public:
 
   void setup();
 
-  IMU() : ArduinoCode() {
+  IMU() :
+    ArduinoCode(),
+    imu_filters(),
+    imu() {
     // Do nothing
   }
 
 private:
-  ZumoIMUFilters * imu_filters;
-  ZumoIMU * imu;
-  Signal imu_angle;
-  Signal imu_filters_angle;
-  Signal imu_filters_angular_speed;
-  Signal imu_filters_combined_angle;
-  // Needed for starting balancing
-  Zumo32U4ButtonA buttonA;
+  ZumoIMUFilters imu_filters;
+  ZumoIMU imu;
+  Integral * integral;
 
   /**
    * Simluate the entire circuit
    */
   void simulate_circuit();
-
-  /**
-   * Build the circuit connecting all components together
-   */
-  void build_circuit();
-
 
 };
 

@@ -11,8 +11,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-#ifndef ZUMOSEGWAY_H_
-#define ZUMOSEGWAY_H_
+#ifndef ZUMOSEGWAYIMU_H_
+#define ZUMOSEGWAYIMU_H_
 
 #ifdef ARDUINO
 #include <Arduino.h>
@@ -22,42 +22,24 @@
 
 #include<Component.h>
 #include<ZumoMotors.h>
-#include<ZumoIMUFilters.h>
+#include<ZumoIMU.h>
 #include<Util.h>
-
-/**
- * Zumo board states
- */
-enum zumo_states_e {
-  /** Initializing state */
-  S_INITIALIZING,
-  /** Balancing state */
-  S_BALANCING,
-  /** Calibrating state */
-  S_CALIBRATING,
-  /** Initializing state */
-  S_MOVING_FORWARD,
-  /** Initializing state */
-  S_MOVING_BACKWARDS,
-  /** Laying State */
-  S_LAYING,
-};
 
 /**
  * Signal Class
  */
-class ZumoSegway: public Component {
+class ZumoSegwayIMU: public Component {
 public:
   /** Zumo motors */
   ZumoMotors motors;
   /** Zumo IMU */
-  ZumoIMUFilters imu;
+  ZumoIMU imu;
 
   /**
    * Constructors
    * @param freq sampling frequency
    */
-  ZumoSegway(float freq) : motors(), imu(){
+  ZumoSegwayIMU(float freq) : motors(), imu(){
     this->freq = freq;
   }
 

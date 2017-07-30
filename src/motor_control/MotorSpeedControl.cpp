@@ -10,7 +10,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License. */
-
+#ifdef NNNN
 #ifndef UNIT_TEST
 
 #ifdef ARDUINO
@@ -47,12 +47,6 @@ inline void MotorSpeedControl::setup() {
 
   plotter->config_plot(2, "title:{Speed}");
 
-
-  // Build the circuit connecting all components together
-  build_circuit();
-
-  
-
   speed = 2 * _PI;
   encoders.getCountsAndResetLeft();
 
@@ -81,19 +75,11 @@ inline void MotorSpeedControl::loop() {
  * Simluate the entire circuit
  */
 void MotorSpeedControl::simulate_circuit() {
-  motors->simulate();
+  float tmp = motors->simulate(speed);
 
-  plotter->plot(2, motors->speed_out.read());
-  plotter->plot(3, motors->speed.read());
-
+  plotter->plot(2, tmp);
+  plotter->plot(3, speed);
 }
 
-/**
- * Build the circuit connecting all components together
- */
-void MotorSpeedControl::build_circuit() {
-  // Connect Plant's inputs
-  motors->speed = speed;
-}
-
+#endif
 #endif

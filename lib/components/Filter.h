@@ -27,11 +27,6 @@
 template<int degree>
 class Filter: public Component {
 public:
-  /** Input port */
-  Port in;
-  /** Output port */
-  Port out;
-
   /**
    * Simulate the circuit component
    *
@@ -43,8 +38,8 @@ public:
    * @param b b coefficients
    */
   Filter(
-    const double b[degree + 1],
-    const double a[degree + 1]) {
+    const float b[degree + 1],
+    const float a[degree + 1]) {
 
     // Copy the coefficients
     for (int i = 0; i < degree + 1; i++) {
@@ -62,9 +57,9 @@ public:
   /**
    * Simulate the circuit component
    */
-  inline double simulate() {
+  inline float filter(float in) {
 
-    double tmp_out = in.read() * b[0];
+    float tmp_out = in * b[0];
 
     // Update the state
     for (int i = 0; i < degree; i++){
@@ -77,21 +72,21 @@ public:
       y[i] = y[i - 1];
     }
 
-    x[0] = in.read();
+    x[0] = in;
     y[0] = tmp_out/a[0];
 
-    return out.write(y[0]);
+    return y[0];
   }
 
 private:
   /** B coeficients */
-  double b[degree + 1];
+  float b[degree + 1];
   /** A coeficients */
-  double a[degree + 1];
+  float a[degree + 1];
   /** Previous inputs stored states */
-  double x[degree];
+  float x[degree];
   /** Previous outputs stored states */
-  double y[degree];
+  float y[degree];
 
 };
 

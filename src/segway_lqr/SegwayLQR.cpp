@@ -13,11 +13,11 @@
 #ifndef UNIT_TEST
 
 // Misc.
-#include <SegwayPID.h>
+#include <SegwayLQR.h>
 #include <Commands.h>
 #include <Integral.h>
 
-void SegwayPID::setup() {
+void SegwayLQR::setup() {
   Wire.begin();
 
   Serial.begin(115200);
@@ -47,26 +47,12 @@ void SegwayPID::setup() {
 
   // Display the angle until the user presses A.
   while (!buttonA.getSingleDebouncedRelease()) {
-    // Update the angle using the gyro as often as possible.
-    updateAngleGyro();
-
-    // Every 20 ms (50 Hz), correct the angle using the
-    // accelerometer and also print it.
-    static uint8_t lastCorrectionTime = 0;
-    uint8_t m = millis();
-    if ((uint8_t)(m - lastCorrectionTime) >= 20)
-    {
-      lastCorrectionTime = m;
-      correctAngleAccel();
-    }
+    // Just wait
   }
   delay(500);
 }
 
-void SegwayPID::loop() {
-  // Update the angle using the gyro as often as possible.
-  updateAngleGyro();
-
+void SegwayLQR::loop() {
   // Every 20 ms (50 Hz), correct the angle using the
   // accelerometer, print it, and set the motor speeds.
   static byte lastCorrectionTime = 0;
@@ -74,22 +60,23 @@ void SegwayPID::loop() {
   if ((byte)(m - lastCorrectionTime) >= 20)
   {
     lastCorrectionTime = m;
-    correctAngleAccel();
-    // filter_angular_speed();
-    filter_angle();
-    // get_combined_angle();
+    get_angle();
+    get_angular_speed();
+    get_omega();
+    compensator();
     setMotors();
   }
 }
 
-void SegwayPID::get_angular_speed() {
+// TODO: Add HPF here
+void SegwayLQR::get_angular_speed() {
   gyro.read();
   g_read = -gyro.g.y;
 
-  g_angular_speed = g_read * 70 / 1000000;
+  g_angular_speed = DEG2RAD(((float)gyroOffsetY + g_read) * 70 / 1000000);
 }
 
-void SegwayPID::filter_angular_speed() {
+void SegwayLQR::filter_angular_speed() {
   const int degree = 3;
   const float a[4] = {1.00000, -2.37409, 1.92936, -0.53208};
   const float b[4] = {0.72944, -2.18832, 2.18832, -0.72944};
@@ -115,66 +102,10 @@ void SegwayPID::filter_angular_speed() {
   hp_g_angular_speed = y[0];
 }
 
-// Reads the gyro and uses it to update the angle estimation.
-void SegwayPID::updateAngleGyro() {
-  // Figure out how much time has passed since the last update.
-  // Figure out how much time has passed since the last update.
-  static uint16_t lastUpdate = 0;
-  uint16_t m = micros();
-  uint16_t dt = m - lastUpdate;
-  lastUpdate = m;
-
-  get_angular_speed();
-
-  // Calculate how much the angle has changed, in degrees, and
-  // add it to our estimation of the current angle.  The gyro's
-  // sensitivity is 0.07 dps per digit.
-  angle += ((float)gyroOffsetY + g_read) * 70 * dt / 1000000000;
-}
-
-inline void SegwayPID::get_angle() {
+inline void SegwayLQR::get_angle() {
+  static float a_angle_1;
   compass.read();
-  a_angle = atan2(compass.a.z, -compass.a.x) * 180 / M_PI;
-}
-
-
-// Low pass filter for the output
-void SegwayPID::filter_angle() {
-  const int degree = 3;
-  const float a[4] = {1.000000, -0.577241, 0.421787, -0.056297};
-  const float b[4] = {0.098531, 0.295593, 0.295593, 0.098531};
-  static float x[4] = {0, 0, 0, 0};
-  static float y[4] = {0, 0, 0, 0};
-
-  digital_filter(degree, a, b, x, y, angle, lp_a_angle);
-}
-
-inline void SegwayPID::get_combined_angle() {
-  static float x_1 = 0;
-  static float y_1 = 0;
-
-  float tmp = y_1 + (hp_g_angular_speed + x_1) / (2 *  freq);
-
-  /*
-   * Discrete integrator
-   * y(k) = y(k - 1) + (x(k) + x(k - 1)) * Ts / 2
-   */
-
-  // Update stored states
-  y_1 = constrain(tmp, -180, 180);
-  x_1 = hp_g_angular_speed;
-
-  c_angle = tmp + lp_a_angle;
-
-}
-
-// Reads the accelerometer and uses it to adjust the angle
-// estimation.
-void SegwayPID::correctAngleAccel() {
-  get_angle();
-
-  // Calculate the angle according to the accelerometer.
-  aAngle = a_angle;
+  a_angle = atan2(compass.a.z, -compass.a.x);
 
   // Calculate the magnitude of the measured acceleration vector,
   // in units of g.
@@ -195,49 +126,133 @@ void SegwayPID::correctAngleAccel() {
 
   // Adjust the angle estimation.  The higher the weight, the
   // more the angle gets adjusted.
-  angle = weight * aAngle + (1 - weight) * angle;
+  a_angle_1 = weight * a_angle + (1 - weight) * a_angle_1;
+
+  a_angle = a_angle_1;
+}
+
+
+// Low pass filter for the output
+void SegwayLQR::filter_angle() {
+  const int degree = 3;
+  const float a[4] = {1.000000, -0.577241, 0.421787, -0.056297};
+  const float b[4] = {0.098531, 0.295593, 0.295593, 0.098531};
+  static float x[4] = {0, 0, 0, 0};
+  static float y[4] = {0, 0, 0, 0};
+
+  digital_filter(degree, a, b, x, y, angle, lp_a_angle);
+}
+
+inline void SegwayLQR::get_combined_angle() {
+  static float x_1 = 0;
+  static float y_1 = 0;
+
+  float tmp = y_1 + (hp_g_angular_speed + x_1) / (2 *  freq);
+
+  /*
+   * Discrete integrator
+   * y(k) = y(k - 1) + (x(k) + x(k - 1)) * Ts / 2
+   */
+
+  // Update stored states
+  y_1 = constrain(tmp, -180, 180);
+  x_1 = hp_g_angular_speed;
+
+  c_angle = tmp + lp_a_angle;
+
+}
+
+void SegwayLQR::get_omega() {
+  float left_speed = encoders.getCountsAndResetLeft() * 2 * _PI * freq * count2cycle;
+  float right_speed = encoders.getCountsAndResetRight() * 2 * _PI * freq * count2cycle;
+
+  // Estimate the omega out of the average of both motors' speeds
+  e_omega = (left_speed + right_speed) / 2;
+
+}
+
+void SegwayLQR::compensator() {
+  const float targetAngle = 0;
+  static float o_x[states] = {0, 0, 0, 0, 0, 0};
+  static float o_x_dot[states] = {0, 0, 0, 0, 0, 0};
+
+  static float y[outputs] = {0, 0, 0};
+  static float y_tilde[outputs] = {0, 0, 0};
+
+
+  // Form y vector
+  y[0] = a_angle - targetAngle;
+  y[1] = g_angular_speed;
+  y[2] = e_omega;
+
+  // Calculate y_tilde
+  for (int o = 0; o < outputs; o++) {
+    y_tilde[o] = y[o];
+    for (int s = 0; s < states; s++) {
+        y_tilde[o] -= C[o][s]*o_x[s];
+    }
+  }
+
+  // Calculate state derivative
+  for (int s = 0; s < states; s++) {
+    o_x_dot[s] = B[s] * u;
+
+    // Multiply with A matrix
+    for (int s_1 = 0; s_1 < states; s_1++) {
+      o_x_dot[s] += A[s][s_1]*o_x[s_1];
+    }
+
+    // Multiply by L matrix
+    for (int o = 0; o < outputs; o++) {
+      o_x_dot[s] += L[s][o]*y[o];
+    }
+  }
+
+  u = 0;
+
+  // Calculate new states
+  for (int s = 0; s < states; s++) {
+    // Calc new state
+    o_x[s] = o_x_dot[s]/freq + o_x[s];
+
+    // Calc the output
+    u += o_x[s]*K[s];
+  }
+
 }
 
 // This function uses our current angle estimation and a PID
 // algorithm to set the motor speeds.  This is the core of the
 // robot's balancing algorithm.
-void SegwayPID::setMotors() {
-  const float targetAngle = -0.4;
+void SegwayLQR::setMotors() {
 
-  angle = lp_a_angle;
+
+  angle = a_angle;
 
   int32_t speed;
-  if (abs(angle) > 45) {
+  if (abs(RAD2DEG(angle)) > 45) {
     // If the robot is tilted more than 45 degrees, it is
     // probably going to fall over.  Stop the motors to prevent
     // it from running away.
     speed = 0;
   } else {
 
-    static float u_1 = 0;
-    static float e_1 = 0;
-    static float e_2 = 0;
+    compensator();
 
-    float error = targetAngle - angle;
-
-    speed = u_1 + a * error + b * e_1 + c * e_2;
-    speed = constrain(speed, -400, 400);
-
-    e_2 = e_1;
-    e_1 = error;
-    u_1 = speed;
+    speed = constrain(u, -400, 400);
 
   }
+
   motors.setSpeeds(speed, speed);
 
   Serial.print("1 ");
-  Serial.println(angle);
+  Serial.println(a_angle);
   //
   // Serial.print("2 ");
-  // Serial.println(a_angle);
+  // Serial.println(g_angular_speed);
   //
   // Serial.print("3 ");
-  // Serial.println(lp_a_angle);
+  // Serial.println(e_omega);
 }
 
 #endif

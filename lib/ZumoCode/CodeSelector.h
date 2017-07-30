@@ -17,6 +17,8 @@
 enum code_selector_e {
   /** PID controlled Segway */
   SEGWAY_PID,
+  /** LQR controlled Segway */
+  SEGWAY_LQR,
   /** Motor Speed controll */
   ZUMOMOTOR_SPEED_PID,
   /** IMU demo */

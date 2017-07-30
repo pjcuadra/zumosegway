@@ -18,9 +18,6 @@
  */
 class ZumoIMU: public Component {
 public:
-  /** Output port */
-  Port out;
-
   /**
    * Constructor
    */
@@ -109,24 +106,24 @@ public:
 
     // Calculate the magnitude of the measured acceleration vector,
     // in units of g.
-    LSM303::vector<double> const aInG = {
-      (double)compass.a.x / 4096,
-      (double)compass.a.y / 4096,
-      (double)compass.a.z / 4096}
+    LSM303::vector<float> const aInG = {
+      (float)compass.a.x / 4096,
+      (float)compass.a.y / 4096,
+      (float)compass.a.z / 4096}
     ;
-    double mag = sqrt(LSM303::vector_dot(&aInG, &aInG));
+    float mag = sqrt(LSM303::vector_dot(&aInG, &aInG));
 
     // Calculate how much weight we should give to the
     // accelerometer reading.  When the magnitude is not close to
     // 1 g, we trust it less because it is being influenced by
     // non-gravity accelerations, so we give it a lower weight.
-    double weight = 1 - 5 * abs(1 - mag);
+    float weight = 1 - 5 * abs(1 - mag);
     weight = constrain(weight, 0, 1);
     weight /= 100;
 
     // Adjust the angle estimation.  The higher the weight, the
     // more the angle gets adjusted.
-    angle = weight * aAngle + (1 - weight) * angle.read();
+    angle = weight * aAngle + (1 - weight) * angle;
   }
 
   /**
@@ -144,18 +141,18 @@ public:
     // Calculate how much the angle has changed, in degrees, and
     // add it to our estimation of the current angle.  The gyro's
     // sensitivity is 0.07 dps per digit.
-    angle += ((double)gyro.g.y - gyroOffsetY) * 70 * dt / 1000000000;
+    angle += ((float)gyro.g.y - gyroOffsetY) * 70 * dt / 1000000000;
   }
 
   /**
    * Simluate the component
    */
-  inline double simulate() {
+  inline float get_angle() {
 
     correctAngleAccel();
     printAngles();
 
-    return out.write(-angle.read());
+    return -angle;
   }
 
 
@@ -167,11 +164,11 @@ private:
   /** LCD */
   Zumo32U4LCD lcd;
   /** Angle signal */
-  Signal angle;
+  double angle;
   /** Average reading obtained from the gyro's Y axis during calibration. */
-  double gyroOffsetY;
+  float gyroOffsetY;
   /** This is just like "angle", but it is based solely on the accelerometer. */
-  double aAngle;
+  float aAngle;
 };
 
 #endif

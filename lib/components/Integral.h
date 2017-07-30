@@ -27,18 +27,13 @@
  */
 class Integral: public Component {
 public:
-  /** Input port */
-  Port in;
-  /** Output port */
-  Port out;
-
   /**
    * Constructor
    * @param lower lower saturation limit
    * @param upper upper saturation limit
    * @param freq sampling frequency
    */
-  Integral(double lower, double upper, double freq) {
+  Integral(float lower, float upper, float freq) {
     this->lower = lower;
     this->upper = upper;
     this->freq = freq;
@@ -50,8 +45,8 @@ public:
   /**
    * Simulate the circuit component
    */
-  inline double simulate() {
-    double tmp = y_1 + (in.read() + x_1) / (2 *  freq);
+  inline float calculate(float in) {
+    float tmp = y_1 + (in + x_1) / (2 *  freq);
 
     /*
      * Discrete integrator
@@ -60,20 +55,20 @@ public:
 
     // Update stored states
     y_1 = constrain(tmp, lower, upper);
-    x_1 = in.read();
+    x_1 = in;
 
-    return out.write(y_1);
+    return y_1;
   }
 
 private:
   /** Limit circuit component */
-  double lower;
-  double upper;
+  float lower;
+  float upper;
   /** Sampling frequency */
-  double freq;
+  float freq;
 
-  double x_1;
-  double y_1;
+  float x_1;
+  float y_1;
 };
 
 #endif

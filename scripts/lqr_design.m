@@ -32,7 +32,9 @@ else
   disp(" -> Great! System is observable");
 endif
 
-Q = model.c'*model.c
+Q = model.c'*model.c;
+
+Q
 
 %R = 1/(max_acc^2);
 R = 1
@@ -52,10 +54,42 @@ P
 clf;
 
 Ac = model.a - model.b*K;
-
-sys_cl = ss(Ac, model.b, model.c, model.d)
-
+sys_cl = ss(Ac, model.b, model.c, model.d);
+figure(1);
+clf(1)
 impulse(sys_cl, 2);
+
+disp("Slowest pole")
+s_p = 1000;
+for i = 1:size(P)(1)
+  if (abs(real(P(i))) < abs(real(s_p)))
+    s_p = P(i);
+  endif
+endfor
+s_p
+
+disp("Observer's poles")
+for i = 1:size(model.a)(1)
+  o_p(i) = (10 + i)*real(s_p) + imag(s_p);
+endfor
+o_p
+
+disp("Observer matrix")
+L = place(model.a',model.c',o_p)'
+
+disp("Full compensator model")
+Ace = [(model.a-model.b*K) (model.b*K);
+        zeros(size(model.a)) (model.a-L*model.c)];
+Bce = [model.b; % N matrix is 1 since our reference is consider to be 0
+        zeros(size(model.b))];
+Cce = [model.c zeros(size(model.c))];
+Dce = [0;0;0];
+
+fcss = ss(Ace, Bce, Cce, Dce)
+figure(2);
+clf(2)
+impulse(fcss, 2)
+
 
 
 

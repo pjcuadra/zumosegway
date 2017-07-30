@@ -28,27 +28,17 @@
  */
 class ZumoControlledMotors: public Component {
 public:
-  /** Speed */
-  Port speed;
-  /** Debug output speed */
-  Signal speed_out;
-
   /**
    *  Constructors
    */
-  ZumoControlledMotors(double freq) {
+  ZumoControlledMotors(float freq) {
     encoders.getCountsAndResetLeft();
     encoders.getCountsAndResetRight();
 
     this->freq = freq;
 
-    left_pid = new PID(P, I, D, freq, -400, 400);
-    right_pid = new PID(P, I, D, freq, -400, 400);
-
-    left_pid->in = left_speed_e;
-    left_pid->out = left_pid_out;
-    right_pid->in = right_speed_e;
-    right_pid->out = right_pid_out;
+    left_pid = new PID(P, I, D, freq);
+    right_pid = new PID(P, I, D, freq);
 
   }
 
@@ -60,21 +50,20 @@ public:
   /**
    *  Simulate the component
    */
-  inline double simulate() {
+  inline float simulate(float speed) {
+    float tmp = 0;
     get_encoder_speed();
 
-    left_speed_e = speed.read() - left_speed;
-    right_speed_e = speed.read() - right_speed;
+    left_speed_e = speed - left_speed;
+    right_speed_e = speed - right_speed;
 
-    left_pid->simulate();
-    right_pid->simulate();
+    tmp = left_pid->simulate(left_speed_e);
+    motors.setLeftSpeed((int16_t) tmp);
 
-    speed_out.write(left_speed);
+    tmp = right_pid->simulate(right_speed_e);
+    motors.setRightSpeed((int16_t) tmp);
 
-    motors.setLeftSpeed((int16_t) left_pid_out.read());
-    motors.setRightSpeed((int16_t) right_pid_out.read());
-
-    return 0;
+    return tmp;
 
   }
 
@@ -84,29 +73,25 @@ private:
   /** Zumo Encoders */
   Zumo32U4Encoders encoders;
   /** Left Error Speed */
-  Signal left_speed_e;
+  float left_speed_e;
   /** Right Error Speed */
-  Signal right_speed_e;
-  /** Left PID controller */
-  Signal left_pid_out;
-  /** Right PID controller */
-  Signal right_pid_out;
+  float right_speed_e;
   /** Left speed */
-  double left_speed;
+  float left_speed;
   /** Right speed */
-  double right_speed;
+  float right_speed;
   /** Sampling Frequency */
-  double freq;
+  float freq;
   /** P parameterer of controller */
-  const double P = 20;
+  const float P = 20;
   /** I parameterer of controller */
-  const double I = 200;
+  const float I = 200;
   /** D parameterer of controller */
-  const double D = 0;
+  const float D = 0;
   /** Zumo 100:1 motor gear ratio */
-  const double gear_ratio = 100.37;
+  const float gear_ratio = 100.37;
   /** Encoder count to cycle convertion constant */
-  const double count2cycle = 1 / (12* gear_ratio);
+  const float count2cycle = 1 / (12* gear_ratio);
   /** Left PID controller */
   PID * left_pid;
   /** Right PID controller */

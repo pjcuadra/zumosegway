@@ -43,7 +43,7 @@ private:
   /** Sampling period in ms */
   const byte sampling_period = 20;
   /** Sampling frequency */
-  const double sampling_freq = 1 / ((double) sampling_period / 1000.0);
+  const float sampling_freq = 1 / ((float) sampling_period / 1000.0);
 
   // Needed for starting balancing
   Zumo32U4ButtonA buttonA;
@@ -54,7 +54,7 @@ private:
   ZumoControlledMotors * motors;
 
   // Signals
-  Signal speed;
+  float speed;
 
   // Other variables
   /** Last sampled time */
@@ -64,15 +64,7 @@ private:
    * Simluate the entire circuit
    */
   void simulate_circuit();
-
-  /**
-   * Build the circuit connecting all components together
-   */
-  void build_circuit();
-
-
-
-
+  
 };
 
 #endif
