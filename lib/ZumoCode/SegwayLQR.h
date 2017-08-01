@@ -59,55 +59,29 @@ public:
 
   float freq = 50;
 
-  float u = 0;
+  static const int outputs = 2;
+  static const int states = 4;
 
-  static const int outputs = 3;
-  static const int states = 6;
-
-  const float K[states] = {0, -93.002, 2277.1, 172.66, -23.831, 0.49942};
-
-  // Observer Model
-  const float A[states][states] = {{0, 1, 0, 0, 0, 0},
-                                    {0, -0.4132, 0, 0, 0.007851, 0.019},
-                                    {0, 0, 0, 1, 0, 0},
-                                    {0, -7.327, 173.9, 0, 0.1392, 0.3369},
-                                    {0, 0, 0, 0, 0, 1},
-                                    {0, 0, 0, 0, -676, -52}};
-
-  const float B[states] = {0, 0, 0, 0, 0, 52.9};
-
-  const float C[outputs][states] = {{0, 0, 1, 0, 0, 0},
-                                    {0, 0, 0, 1, 0, 0},
-                                    {0, 0, 0, 0, 1, 0}};
-
-  const float L[states][outputs] = {{0, 0, 0},
-                                    {-8.1111, -0.30223,  -0.88620},
-                                    {-0.40517, 1.0007, -0.00024511},
-                                    {1.0007, -5.3065, -15.730},
-                                    {-0.00024511, -15.730, -46.702},
-                                    {0.0064736, 613.57, 1821.4}};
+  // const float K[states] = {3.1623, 478.3485, 9.0426, 26.1122};
+  const float K[states] = {80, 4369.3049, 18.1538, 69.6881};
+  const float scale = 0.5;
+  const float target_angle = -0.5;
+  float x[states] = {0, 0, 0, 0};
 
 
-  float a_angle;
-  float lp_a_angle;
-  float g_read;
-  float g_angular_speed;
-  float hp_g_angular_speed;
-  float c_angle;
-  float e_omega;
+  float a_angular_position = 0;
+  float g_angular_speed = 0;
+  float c_angle = 0;
+  float e_angular_speed = 0;
+  float e_angular_position = 0;
 
   void loop();
   void setup();
   void setMotors();
-  void get_angle();
-  void get_angular_speed();
-  void get_omega();
-
-  void filter_angle();
-  void filter_angular_speed();
-
-  void get_combined_angle();
-  void compensator();
+  float get_zumo_angular_position();
+  float get_zumo_angular_speed();
+  float get_motor_angular_position();
+  float get_motor_angular_speed();
 
 private:
 

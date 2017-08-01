@@ -1,12 +1,13 @@
-function [plant, model] = get_plant()
+function [plant, model] = get_model()
 
   % Load needed packages                      
-  pkg load control
+  %pkg load control
  
   % Get the state variable model
   model = get_ssmodel();
   
     % Get the transfer function
-  plant = get_tf();
+  plant = tf(model);
+  plant = plant(2);
 
-endfunction
+end

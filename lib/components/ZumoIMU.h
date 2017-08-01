@@ -82,20 +82,6 @@ public:
   }
 
   /**
-   * Print angles
-   */
-  void printAngles() {
-    // lcd.gotoXY(0, 0);
-    // lcd.print(angle.read());
-    // lcd.print(F("    "));
-    //
-    // lcd.gotoXY(0, 1);
-    // lcd.print(aAngle);
-    // lcd.print("  ");
-    // Serial.println(angle.read());
-  }
-
-  /**
    * Reads the accelerometer and uses it to adjust the angle estimation.
    */
   void correctAngleAccel() {
@@ -138,21 +124,24 @@ public:
 
     gyro.read();
 
+    gyro_read = gyro.g.y;
+
     // Calculate how much the angle has changed, in degrees, and
     // add it to our estimation of the current angle.  The gyro's
     // sensitivity is 0.07 dps per digit.
-    angle += ((float)gyro.g.y - gyroOffsetY) * 70 * dt / 1000000000;
+    angle += ((float)gyro_read - gyroOffsetY) * 70 * dt / 1000000000;
   }
 
   /**
    * Simluate the component
    */
   inline float get_angle() {
-
     correctAngleAccel();
-    printAngles();
-
     return -angle;
+  }
+
+  inline float get_speed() {
+    return -((float)gyro_read - gyroOffsetY) * 70 / 1000000;
   }
 
 
@@ -169,6 +158,7 @@ private:
   float gyroOffsetY;
   /** This is just like "angle", but it is based solely on the accelerometer. */
   float aAngle;
+  float gyro_read;
 };
 
 #endif

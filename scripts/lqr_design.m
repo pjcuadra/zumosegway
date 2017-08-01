@@ -1,19 +1,21 @@
 clear;
 clc;
 
-pkg load control
-
 load_physical_constants
+
+% Max acceptable values per state and input
+max_motor_angular_position = 2 * 2 * pi; % 2 complete cycles
+max_zumo_angular_position = 5 * 2 * pi / 180; % 5 Degrees
+max_motor_angular_speed = 4 * 2 * pi; % RPS (measured)
+max_zumo_angular_speed = 1 * 2 * pi / 180; % 1 DPS
+max_input = 400;
+rho = 1;
 
 % Get the model
 [plant, model] = get_model()
 
 % Number of states 
-n_states = size(model.a)(1);
-max_acc = motor_out_max*r;
-max_aceptable_angle = pi*5/180;
-max_aceptable_omega = pi*2/180;
-rho = 1;
+n_states = size(model.a, 1);
 
 % Check controlability
 co =  ctrb(model);
@@ -22,7 +24,7 @@ if (rank(co) > n_states)
   return;
 else
   disp(" -> Great! System is controllable");
-endif
+end
 
 ob = obsv(model);
 if (rank(ob) > n_states)
@@ -30,20 +32,31 @@ if (rank(ob) > n_states)
   return;
 else
   disp(" -> Great! System is observable");
-endif
+end
 
-Q = model.c'*model.c;
+Q = eye(4)
+%Q(1,1) = 1/(max_motor_angular_position)^2;
+%Q(2,2) = 1/(max_zumo_angular_position)^2;
+%Q(3,3) = 1/(max_motor_angular_speed)^2;
+%Q(4,4) = 1/(max_zumo_angular_speed)^2;
+%Q
 
-Q
-
-%R = 1/(max_acc^2);
+R = rho*1/(max_input)^2
 R = 1
-
 
 [K, X, P] = lqr(model, Q, R);
 
 disp("Control Law")
-K
+K_string = "{";
+for k = 1:size(K, 2)
+  if ~(k == 1) 
+    K_string = strcat(K_string, ", ");
+  end
+  K_string = strcat(K_string, num2str(K(k)));
+end
+K_string = strcat(K_string, "}");
+disp("K")
+disp(K_string)
 
 disp("Ricatti Solution")
 X
@@ -57,21 +70,24 @@ Ac = model.a - model.b*K;
 sys_cl = ss(Ac, model.b, model.c, model.d);
 figure(1);
 clf(1)
-impulse(sys_cl, 2);
+impulse(sys_cl, 3);
+
+disp("Skipping Observer design ...");
+return;
 
 disp("Slowest pole")
 s_p = 1000;
-for i = 1:size(P)(1)
+for i = 1:size(P, 1)
   if (abs(real(P(i))) < abs(real(s_p)))
     s_p = P(i);
-  endif
-endfor
+  end
+end
 s_p
 
 disp("Observer's poles")
-for i = 1:size(model.a)(1)
+for i = 1:size(model.a, 1)
   o_p(i) = (10 + i)*real(s_p) + imag(s_p);
-endfor
+end
 o_p
 
 disp("Observer matrix")

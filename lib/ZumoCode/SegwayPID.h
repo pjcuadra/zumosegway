@@ -52,7 +52,7 @@ public:
 
   float freq = 50;
 
-  float P = 36;
+  float P = 40;
   float I = 576;
   float D = 0.5625;
 
