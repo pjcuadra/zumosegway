@@ -1,20 +1,12 @@
-function [plant, servo] = get_plant()
-
-  # Consants (context)
-  l = 0.0423; # Height of the zumo
-  m =  0.24200; # Mass of the zumo
-  g =  9.8100; # Gravitational constant
-  r_w = 0.019; # Wheel radius
-  K_s = pi * r_w / 60 # Proportionality constant between rotational and linear 
-                     # speed
-  K_s = 0.012;
+function [plant, model] = get_plant()
 
   % Load needed packages                      
   pkg load control
-  
-  servo = tf([K_s], [l]);
 
-  % Create the system for the plant
-  plant = servo*tf([-1 0], [l 0 -g]);
+  % Get the transfer function
+  plant = get_tf();
+  
+  % Get the state variable model
+  model = get_ssmodel();
 
 endfunction

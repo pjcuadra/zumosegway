@@ -8,14 +8,15 @@ pkg load instrument-control
 BUFF_SIZE = 256;
 BAUDRATE = 115200;
 %DEVICE = '/dev/rfcomm0';
-DEVICE = '/dev/ttyACM0';
+DEVICE = '/dev/zumo';
 REFRESH_RATE = 10;
+TIMEOUT = 20;
 
 refresh_count = 0;
 
 % Connect to the serial port
 try
-  s1 = serial(DEVICE, BAUDRATE)
+  s1 = serial(DEVICE, BAUDRATE, TIMEOUT)
 catch
   disp("Serial port coun't be opened");
   return;
@@ -34,12 +35,6 @@ try
   while (true)
     line = srl_read_line(s1);
     
-    k = kbhit (1);
-    
-    if (k == 'x')
-      break;
-    endif
-
     %% Split the line
     cstr = strsplit(line, ' ');
 
@@ -65,10 +60,6 @@ try
       y{fig_num} = [];
       t{fig_num} = [];
       count{fig_num} = 0;
-    endif
-
-    if (fig_num != 4)
-       continue;
     endif
 
     count{fig_num}++;
@@ -104,8 +95,8 @@ try
   endwhile
 
 catch err
-  disp("Error on line: ");
-  disp(err.stack.line);
+  error("Error on line: ");
+  error(err.stack.line);
   warning(err.identifier, err.message);
 end_try_catch
 
