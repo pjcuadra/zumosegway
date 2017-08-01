@@ -34,15 +34,10 @@ else
   disp(" -> Great! System is observable");
 end
 
-Q(1,1) = 1/(max_motor_angular_position)^2;
-Q(2,2) = 1/(max_zumo_angular_position)^2;
-Q(3,3) = 1/(max_motor_angular_speed)^2;
-Q(4,4) = 1/(max_zumo_angular_speed)^2;
 Q = model.c'*model.c
-Q(1,1) = 10;
-Q(4,4) = 10;
+Q(1,1) = 1;
+Q(4,4) = 1;
 
-R = rho*1/(max_input)^2
 R = 1
 
 [K, X, P] = lqr(model, Q, R);

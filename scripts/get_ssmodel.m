@@ -1,8 +1,5 @@
 function model = get_ssmodel()
 
-  % Load needed packages                      
-  %pkg load control
-  
   % Consants (context)
   load_physical_constants
   
@@ -18,9 +15,6 @@ function model = get_ssmodel()
   
   states = size(E, 1);
   
-  
-  % State vector defined as
-  % x = [x dx/dt theta dtheta/dt omega domega/dt]'
   A = [zeros(states) eye(states);
        zeros(states, 1) -inv(E)*G -inv(E)*F];
   B = [zeros(states, 1);

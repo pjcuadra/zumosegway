@@ -1,11 +1,11 @@
 /** Control Law*/
-float K[statesNumber] = {3.1623, 6466.3804, 143.932, 550.8943};
+float K[statesNumber] = {3.1623, 500.2828, 1.8826, 100.3347};
 /** Radians to Degree convertion constant */
-const float radianToDegree = 180.0 / ( 2 * M_PI );
+const float radianToDegree = 180.0 / M_PI;
 /** Degree to convertion constant */
 const float degreeToRadian = 1 / radianToDegree;
 
-const float scaleConst = 0.1;
+const float scaleConst = 1;
 
 /**
  * LQR control law

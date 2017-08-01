@@ -4,18 +4,20 @@ f_s = 1/T_s;
 
 % Consants (context)
 m = 0.24200; % Mass of the zumo
+m_1 = 0;
+m_2 = m;
 b = 0.1; % Friction coeficient of cart
-l_1 = 0.062;
-l_2 = 0;
-l = l_1; % Height of the zumo
-beta_m = 0.05;
-beta_gamma = 0.001;
+l_1 = 0;
+l_2 = 0.062;
+l = l_2/2 + (l_1 + l_2) * m_1/(2*(m_1 + m_2)); % Height of the zumo
+beta_m = 0;
+beta_gamma = 0;
 
 g =  9.8100; % Gravitational constant
 R = 0.019; % Wheele radius
 R_i = 0.01; % Internal wheel radius;
-
-I = m*(l_1/2 + l_2)^2; % Intertial momentum
+ 
+I = m_1*(l_1/2 + l_2)^2 + (m_2*l_2^2)/12; % Intertial momentum
 
 m_w = 0.004; % Mass of the wheel
 m_c = 0.009; % Mass of the caterpillar band
