@@ -9,13 +9,12 @@ m_2 = m;
 b = 0.1; % Friction coeficient of cart
 l_1 = 0;
 l_2 = 0.062;
-l = l_2/2 + (l_1 + l_2) * m_1/(2*(m_1 + m_2)); % Height of the zumo
+l = l_2/2 + (l_1 + l_2) * m_1/(2*m); % Height of the zumo
 beta_m = 0;
 beta_gamma = 0;
 
 g =  9.8100; % Gravitational constant
 R = 0.019; % Wheele radius
-R_i = 0.01; % Internal wheel radius;
  
 I = m_1*(l_1/2 + l_2)^2 + (m_2*l_2^2)/12; % Intertial momentum
 

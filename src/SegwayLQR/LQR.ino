@@ -1,5 +1,5 @@
 /** Control Law*/
-float K[statesNumber] = {3.1623, 500.2828, 1.8826, 100.3347};
+float K[statesNumber] = {1, 470.3727, 9.6059, 19.7794};
 /** Radians to Degree convertion constant */
 const float radianToDegree = 180.0 / M_PI;
 /** Degree to convertion constant */
