@@ -8,8 +8,8 @@ b = 0.1; % Friction coeficient of cart
 l_1 = 0.062;
 l_2 = 0;
 l = l_1; % Height of the zumo
-beta_m = 0.1;
-beta_gamma = 0.01;
+beta_m = 0.05;
+beta_gamma = 0.001;
 
 g =  9.8100; % Gravitational constant
 R = 0.019; % Wheele radius

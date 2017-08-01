@@ -34,12 +34,13 @@ else
   disp(" -> Great! System is observable");
 end
 
-Q = eye(4)
-%Q(1,1) = 1/(max_motor_angular_position)^2;
-%Q(2,2) = 1/(max_zumo_angular_position)^2;
-%Q(3,3) = 1/(max_motor_angular_speed)^2;
-%Q(4,4) = 1/(max_zumo_angular_speed)^2;
-%Q
+Q(1,1) = 1/(max_motor_angular_position)^2;
+Q(2,2) = 1/(max_zumo_angular_position)^2;
+Q(3,3) = 1/(max_motor_angular_speed)^2;
+Q(4,4) = 1/(max_zumo_angular_speed)^2;
+Q = model.c'*model.c
+Q(1,1) = 10;
+Q(4,4) = 10;
 
 R = rho*1/(max_input)^2
 R = 1

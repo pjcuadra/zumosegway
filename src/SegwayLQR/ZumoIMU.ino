@@ -56,6 +56,16 @@ void sampleGyro() {
   angularPosition += angularSpeed * dt / 1000000;
 }
 
+void filterAngularSpeed() {
+  const int degree = 3;
+  const float a[degree + 1] = {1.0000 ,  -2.3741 ,   1.9294,   -0.5321};
+  const float b[degree + 1] = {0.0029  ,  0.0087  ,  0.0087 ,   0.0029};
+  static float x[degree + 1] = {0, 0, 0, 0};
+  static float y[degree + 1] = {0, 0, 0, 0};
+
+  digitalFilter(degree, a, b, x, y, angularSpeed, angularSpeed);
+}
+
 /**
  * Read the acceleormeter and adjust the angle
  */
