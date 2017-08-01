@@ -32,7 +32,7 @@
 // Code Class pointer
 ArduinoCode * code;
 // Code Class selector
-code_selector_e selector = SEGWAY_LQR;
+code_selector_e selector = SEGWAY_PID;
 
 void setup() {
   // Select the code class to run

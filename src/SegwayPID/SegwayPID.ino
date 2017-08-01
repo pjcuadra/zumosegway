@@ -16,50 +16,63 @@
 Zumo32U4ButtonA buttonA;
 Zumo32U4Motors motors;
 
-float freq = 50;
+/** Sampling Period in ms */
+const uint8_t samplingPeriodMS = 20;
+/** Sampling Period in s */
+const float samplingPeriod = samplingPeriodMS / 1000.0;
+/** Sampling frequency */
+const float samplingFrequency = 1/samplingPeriod;
 
-float P = 40;
-float I = 576;
-float D = 0.5625;
+/** Low pass filter angular Position*/
+float angularPositionLP = 0;
+/** Zumo's angular position */
+float angularPosition = 0;
+/** Zumo's angular speed */
+float angularSpeed = 0;
 
-float a = (P + I/(2 * freq) + D * freq);
-float b = (-P + I/(2 * freq) - 2 * freq * D);
-float c = D * freq;
+/** PWM signal applied to the motor's driver 400 is 100% cicle and -400 100% but inverse direction */
+int32_t speed;
+/** Error of the angle */
+float angleError = 0;
 
-float lp_a_angle = 0;
-float angle = 0;
-
+/**
+ * Setup Function
+ */
 void setup() {
   Wire.begin();
 
   Serial.begin(115200);
 
-  setup_gyro();
-  setup_accelerometer();
+  // Setup the IMU
+  setupIMU();
 
-  gyro_calibrate();
+  // Calibrate the IMU (obtain the offset)
+  calibrateGyro();
 
   // Display the angle until the user presses A.
   while (!buttonA.getSingleDebouncedRelease()) {
     // Update the angle using the gyro as often as possible.
-    updateAngleGyro();
+    sampleGyro();
 
     // Every 20 ms (50 Hz), correct the angle using the
     // accelerometer and also print it.
     static uint8_t lastCorrectionTime = 0;
     uint8_t m = millis();
-    if ((uint8_t)(m - lastCorrectionTime) >= 20)
+    if ((uint8_t)(m - lastCorrectionTime) >= samplingPeriodMS)
     {
       lastCorrectionTime = m;
-      correctAngleAccel();
+      sampleAccelerometer();
     }
   }
   delay(500);
 }
 
+/**
+ * Main loop Function
+ */
 void loop() {
   // Update the angle using the gyro as often as possible.
-  updateAngleGyro();
+  sampleGyro();
 
   // Every 20 ms (50 Hz), correct the angle using the
   // accelerometer, print it, and set the motor speeds.
@@ -68,64 +81,45 @@ void loop() {
   if ((byte)(m - lastCorrectionTime) >= 20)
   {
     lastCorrectionTime = m;
-    correctAngleAccel();
-    // filter_angular_speed();
-    filter_angle();
-    // get_combined_angle();
-    setMotors();
+    sampleAccelerometer();
+    filterAngle(); // Low pass filter (IRR)
+    setActuators();
   }
 }
 
-// Low pass filter for the output
-void filter_angle() {
+/**
+ * Apply IRR low pass filter to the angular position
+ */
+void filterAngle() {
   const int degree = 3;
-  const float a[4] = {1.000000, -0.577241, 0.421787, -0.056297};
-  const float b[4] = {0.098531, 0.295593, 0.295593, 0.098531};
-  static float x[4] = {0, 0, 0, 0};
-  static float y[4] = {0, 0, 0, 0};
+  const float a[degree + 1] = {1.000000, -0.577241, 0.421787, -0.056297};
+  const float b[degree + 1] = {0.098531, 0.295593, 0.295593, 0.098531};
+  static float x[degree + 1] = {0, 0, 0, 0};
+  static float y[degree + 1] = {0, 0, 0, 0};
 
-  digital_filter(degree, a, b, x, y, angle, lp_a_angle);
+  digitalFilter(degree, a, b, x, y, angularPosition, angularPositionLP);
 }
 
-// This function uses our current angle estimation and a PID
-// algorithm to set the motor speeds.  This is the core of the
-// robot's balancing algorithm.
-void setMotors() {
+/**
+ * Control the actuators
+ */
+void setActuators() {
   const float targetAngle = -0.4;
 
-  angle = lp_a_angle;
-
-  int32_t speed;
-  if (abs(angle) > 45) {
+  angularPosition = angularPositionLP;
+    
+  if (abs(angularPosition) > 45) {
     // If the robot is tilted more than 45 degrees, it is
     // probably going to fall over.  Stop the motors to prevent
     // it from running away.
     speed = 0;
   } else {
-
-    static float u_1 = 0;
-    static float e_1 = 0;
-    static float e_2 = 0;
-
-    float error = targetAngle - angle;
-
-    speed = u_1 + a * error + b * e_1 + c * e_2;
+    angleError = targetAngle - angularPosition;
+    pid();
     speed = constrain(speed, -400, 400);
-
-    e_2 = e_1;
-    e_1 = error;
-    u_1 = speed;
-
   }
   motors.setSpeeds(speed, speed);
 
-  Serial.print("1 ");
-  Serial.println(angle);
-  //
-  // Serial.print("2 ");
-  // Serial.println(a_angle);
-  //
-  // Serial.print("3 ");
-  // Serial.println(lp_a_angle);
+  Serial.println(angularPosition);
 }
 

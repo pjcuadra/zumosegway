@@ -1,4 +1,14 @@
-inline void digital_filter(const int degree, const float *a, const float *b, float *x, float *y, float in, float &out) {
+/**
+ * Generic Digital filter function
+ * @param degree is the degree of the filter
+ * @param a array of size degree + 1 with the denominator's coefficients 
+ * @param b array of size degree + 1 with the numerator's coefficients
+ * @param x array of size degree + 1 to store the previous input states
+ * @param y array of size degree + 1 to store the previous output states
+ * @param in input to the filter
+ * @param out filtered output
+ */
+void digitalFilter(const int degree, const float *a, const float *b, float *x, float *y, float in, float &out) {
 
   float tmp_out = in * b[0];
 
@@ -20,11 +30,14 @@ inline void digital_filter(const int degree, const float *a, const float *b, flo
 }
 
 /**
- * FIR Filter function
- * @param degree filter's degree
- * @param c
+ * FIR Filter function (WIP)
+ * @param degree is the degree of the filter
+ * @param c array of size degree with the filter's coefficients 
+ * @param x array of size degree to store the previous input states
+ * @param in input to the filter
+ * @param out filtered output
  */
-inline void fir_filter(const int degree, const float *c, float *x, float in, float &out) {
+inline void filterFIR(const int degree, const float *c, float *x, float in, float &out) {
   float tmp_out = 0;
   
   // Apply filter's coeficcients
