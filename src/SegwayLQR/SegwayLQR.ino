@@ -41,6 +41,8 @@ float motorAngularSpeed = 0;
 int32_t speed;
 
 
+
+
 /**
  * Setup Function
  */
@@ -113,7 +115,5 @@ void setActuators() {
   }
  
   motors.setSpeeds(speed, speed);
-
-  Serial.println(motorAngularPosition);
 }
 

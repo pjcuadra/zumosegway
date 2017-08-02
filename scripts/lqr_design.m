@@ -34,13 +34,13 @@ else
   disp(" -> Great! System is observable");
 end
 
-Q = model.c'*model.c
-Q(1,1) = 1;
-Q(4,4) = 1;
+Q = eye(size(model.a,1));
 
 R = 1
 
 [K, X, P] = lqr(model, Q, R);
+
+K = K*pi/180;
 
 disp("Control Law")
 K_string = "{";

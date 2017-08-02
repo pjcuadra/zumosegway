@@ -45,15 +45,16 @@ void sampleGyro() {
   static uint16_t lastUpdate = 0;
   uint16_t m = micros();
   uint16_t dt = m - lastUpdate;
+  float gyroAngularSpeed = 0;
   lastUpdate = m;
 
   gyro.read();
-  angularSpeed = ((float)gyroOffsetY - (float)gyro.g.y) * 70 / 1000;
+  gyroAngularSpeed = ((float)gyroOffsetY - (float)gyro.g.y) * 70 / 1000.0;
 
   // Calculate how much the angle has changed, in degrees, and
   // add it to our estimation of the current angle.  The gyro's
   // sensitivity is 0.07 dps per digit.
-  angularPosition += angularSpeed * dt / 1000000;
+  angularPosition += gyroAngularSpeed * dt / 1000000.0;
 }
 
 void filterAngularSpeed() {
@@ -70,6 +71,13 @@ void filterAngularSpeed() {
  * Read the acceleormeter and adjust the angle
  */
 void sampleAccelerometer() {
+  static uint16_t lastUpdate = 0;
+  uint16_t m = micros();
+  uint16_t dt = m - lastUpdate;
+  float gyroAngularSpeed = 0;
+  static float prevAngularPosition = 0;
+  lastUpdate = m;
+
   compass.read();
   accelerometerAngle = atan2(compass.a.z, -compass.a.x) * 180 / M_PI;
 
@@ -90,9 +98,12 @@ void sampleAccelerometer() {
   weight = constrain(weight, 0, 1);
   weight /= 10;
 
+  prevAngularPosition = angularPosition;
+
   // Adjust the angle estimation.  The higher the weight, the
   // more the angle gets adjusted.
   angularPosition = weight * accelerometerAngle + (1 - weight) * angularPosition;
+  angularSpeed = (angularPosition - prevAngularPosition) * 1000000.0 / dt;
 }
 
 /**

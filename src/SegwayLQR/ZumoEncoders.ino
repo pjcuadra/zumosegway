@@ -1,7 +1,8 @@
 /** Zumo 100:1 motor gear ratio */
 const float gearRatio = 100.37;
 /** Encoder count to cycle convertion constant */
-const float countToCycles = 1 / (12* gearRatio);
+const float countToDegrees = 360 / (float)(12.0 * gearRatio);
+
 /** Zumo encoders */
 Zumo32U4Encoders encoders;
 
@@ -23,12 +24,12 @@ void sampleEncoders() {
   uint16_t dt = m - lastUpdate;
   lastUpdate = m;
   
-  float leftPosition = encoders.getCountsAndResetLeft() * 2 * M_PI * countToCycles;
-  float rightPosition = encoders.getCountsAndResetRight() * 2 * M_PI * countToCycles;
+  float leftPosition = encoders.getCountsAndResetLeft() * countToDegrees;
+  float rightPosition = encoders.getCountsAndResetRight() * countToDegrees;
   float avgPosition = (leftPosition + rightPosition) / 2.0;
 
   
-  motorAngularSpeed = avgPosition * dt / 1000000;
+  motorAngularSpeed = avgPosition * dt / 1000000.0;
   motorAngularPosition += motorAngularSpeed;
 }
 
