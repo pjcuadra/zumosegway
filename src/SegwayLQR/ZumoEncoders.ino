@@ -18,18 +18,19 @@ void clearEncoders() {
  * Sample the encoders
  */
 void sampleEncoders() {
-  // Figure out how much time has passed since the last update.
+  static float prevPosition = 0;
   static uint16_t lastUpdate = 0;
+  static float leftPosition = 0;
+  static float rightPosition = 0;
   uint16_t m = micros();
   uint16_t dt = m - lastUpdate;
   lastUpdate = m;
   
-  float leftPosition = encoders.getCountsAndResetLeft() * countToDegrees;
-  float rightPosition = encoders.getCountsAndResetRight() * countToDegrees;
-  float avgPosition = (leftPosition + rightPosition) / 2.0;
-
+  leftPosition += (float)encoders.getCountsAndResetLeft() * countToDegrees;
+  rightPosition += (float)encoders.getCountsAndResetRight() * countToDegrees;
+  float motorAngularPosition = -(leftPosition + rightPosition) / 2.0;
   
-  motorAngularSpeed = avgPosition * dt / 1000000.0;
-  motorAngularPosition += motorAngularSpeed;
+  motorAngularSpeed = (motorAngularPosition - prevPosition) * 1000000.0 / dt;
+  prevPosition = motorAngularPosition;
 }
 

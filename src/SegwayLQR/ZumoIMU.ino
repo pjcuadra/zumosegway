@@ -9,6 +9,7 @@ L3G gyro;
 LSM303 compass;
 /** Gyro's bias */
 float gyroOffsetY;
+float prevAngularPosition = 0;
 
 /**
  * Setup the Gyro and Accelerometer
@@ -57,16 +58,6 @@ void sampleGyro() {
   angularPosition += gyroAngularSpeed * dt / 1000000.0;
 }
 
-void filterAngularSpeed() {
-  const int degree = 3;
-  const float a[degree + 1] = {1.0000 ,  -2.3741 ,   1.9294,   -0.5321};
-  const float b[degree + 1] = {0.0029  ,  0.0087  ,  0.0087 ,   0.0029};
-  static float x[degree + 1] = {0, 0, 0, 0};
-  static float y[degree + 1] = {0, 0, 0, 0};
-
-  digitalFilter(degree, a, b, x, y, angularSpeed, angularSpeed);
-}
-
 /**
  * Read the acceleormeter and adjust the angle
  */
@@ -75,7 +66,7 @@ void sampleAccelerometer() {
   uint16_t m = micros();
   uint16_t dt = m - lastUpdate;
   float gyroAngularSpeed = 0;
-  static float prevAngularPosition = 0;
+  
   lastUpdate = m;
 
   compass.read();
@@ -98,12 +89,13 @@ void sampleAccelerometer() {
   weight = constrain(weight, 0, 1);
   weight /= 10;
 
-  prevAngularPosition = angularPosition;
-
+  
   // Adjust the angle estimation.  The higher the weight, the
   // more the angle gets adjusted.
   angularPosition = weight * accelerometerAngle + (1 - weight) * angularPosition;
   angularSpeed = (angularPosition - prevAngularPosition) * 1000000.0 / dt;
+  prevAngularPosition = angularPosition;
+  
 }
 
 /**
@@ -128,4 +120,13 @@ void calibrateGyro() {
 
   ledYellow(0);
 }
+
+void filterAngularPositionLP() {
+  const int degree = 5;
+  const float c[degree] = {1/5.0, 1/5.0, 1/5.0, 1/5.0, 1/5.0};
+  static float x[degree] = {0, 0, 0,0,0};
+
+  filterFIR(degree, c, x, angularPosition, angularPosition);
+}
+
 

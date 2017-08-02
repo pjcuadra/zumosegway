@@ -37,14 +37,20 @@ void digitalFilter(const int degree, const float *a, const float *b, float *x, f
  * @param in input to the filter
  * @param out filtered output
  */
-inline void filterFIR(const int degree, const float *c, float *x, float in, float &out) {
+void filterFIR(const int degree, const float *c, float *x, float in, float &out) {
   float tmp_out = 0;
+
+  x[0] = in;
   
   // Apply filter's coeficcients
   for (int i = 0; i < degree; i++){
     tmp_out += c[i] * x[i];
   }
-  
+
+  for (int i = degree - 1; i > 0; i--){
+    x[i] = x[i - 1];
+  }
+
   out = tmp_out;
 }
 

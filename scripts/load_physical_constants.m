@@ -10,8 +10,8 @@ b = 0.1; % Friction coeficient of cart
 l_1 = 0;
 l_2 = 0.062;
 l = l_2/2 + (l_1 + l_2) * m_1/(2*m); % Height of the zumo
-beta_m = 0;
-beta_gamma = 0;
+beta_m = 0.01;
+beta_gamma = 0.01;
 
 g =  9.8100; % Gravitational constant
 R = 0.019; % Wheele radius
@@ -33,7 +33,7 @@ gear_ratio = 100.37;
 count2cycle = 1/(12* gear_ratio);
 motor_in_max = 400; % According to specs
 motor_out_max = 2 * pi * f_s * 120 * count2cycle; % Experimentally
-motor_stall_torque = 0.2180; % From specs 30 oz-in 
+motor_stall_torque = 0.211846554999999; % According to pecs 30 oz-in 
 pulse2torque = motor_stall_torque/400;
 
 % Simplifications

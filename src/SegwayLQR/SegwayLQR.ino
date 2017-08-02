@@ -40,9 +40,6 @@ float motorAngularSpeed = 0;
 /** PWM signal applied to the motor's driver 400 is 100% cicle and -400 100% but inverse direction */
 int32_t speed;
 
-
-
-
 /**
  * Setup Function
  */
@@ -62,8 +59,7 @@ void setup() {
     // Update the angle using the gyro as often as possible.
     sampleGyro();
 
-    // Every 20 ms (50 Hz), correct the angle using the
-    // accelerometer and also print it.
+    // Sample accelerometer every sampling period
     static uint8_t lastCorrectionTime = 0;
     uint8_t m = millis();
     if ((uint8_t)(m - lastCorrectionTime) >= samplingPeriodMS)
@@ -87,12 +83,12 @@ void loop() {
   // accelerometer, print it, and set the motor speeds.
   static byte lastCorrectionTime = 0;
   byte m = millis();
-  if ((byte)(m - lastCorrectionTime) >= 20)
+  if ((byte)(m - lastCorrectionTime) >= 10)
   {
     lastCorrectionTime = m;
     sampleAccelerometer();
+//    filterAngularPositionLP();
     sampleEncoders();
-    filterAngularSpeed();
     setActuators();
   }
 }
@@ -101,7 +97,7 @@ void loop() {
  * Control the actuators
  */
 void setActuators() {
-  const float targetAngle = -0.6;
+  const float targetAngle = 1.45;
     
   if (abs(angularPosition) > 45) {
     // If the robot is tilted more than 45 degrees, it is

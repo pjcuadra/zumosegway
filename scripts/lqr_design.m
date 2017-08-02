@@ -3,14 +3,6 @@ clc;
 
 load_physical_constants
 
-% Max acceptable values per state and input
-max_motor_angular_position = 2 * 2 * pi; % 2 complete cycles
-max_zumo_angular_position = 5 * 2 * pi / 180; % 5 Degrees
-max_motor_angular_speed = 4 * 2 * pi; % RPS (measured)
-max_zumo_angular_speed = 1 * 2 * pi / 180; % 1 DPS
-max_input = 400;
-rho = 1;
-
 % Get the model
 [plant, model] = get_model()
 
@@ -40,7 +32,7 @@ R = 1
 
 [K, X, P] = lqr(model, Q, R);
 
-K = K*pi/180;
+K_s = K*pi/180;
 
 disp("Control Law")
 K_string = "{";
@@ -48,7 +40,7 @@ for k = 1:size(K, 2)
   if ~(k == 1) 
     K_string = strcat(K_string, ", ");
   end
-  K_string = strcat(K_string, num2str(K(k)));
+  K_string = strcat(K_string, num2str(K_s(k)));
 end
 K_string = strcat(K_string, "}");
 disp("K")
@@ -101,7 +93,3 @@ fcss = ss(Ace, Bce, Cce, Dce)
 figure(2);
 clf(2)
 impulse(fcss, 2)
-
-
-
-
