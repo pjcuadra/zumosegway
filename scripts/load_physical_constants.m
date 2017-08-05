@@ -21,9 +21,9 @@ I = m_1*(l_1/2 + l_2)^2 + (m_2*l_2^2)/12; % Intertial momentum
 m_w = 0.004; % Mass of the wheel
 m_c = 0.009; % Mass of the caterpillar band
 
-I_w = m_w*R^2; % Inertia momentum of wheels
+I_w_i = m_w*R^2; % Inertia momentum of wheels
 I_c = m_c*R^2; % Inertia momentum of Caterpilar band
-I_ws = 2*I_w + I_c; % Inertia momentum of Caterpilar system
+I_w = 2*I_w_i + I_c; % Inertia momentum of Caterpilar system
 
 % Motor's constants
 Ts2 = 150e-3;

@@ -90,4 +90,12 @@
   url    = {https://www.pololu.com/product/2214},
 }
 
+@TechReport{main_paper,
+  author      = {Ye Ding, Joshua Gafford, Mie Kunio},
+  title       = {Modeling, Simulation and Fabrication of a Balancing Robot},
+  institution = {Harvard University, Massachusettes Institute of Technology},
+  year        = {2012},
+  abstract    = {A balancing robot is a common demonstration of controls in a dynamic system. Due to the inherent instability of the equilibrium point, appropriate controllability and observability measures must be undertaken to stabilize the system about the desired equilibrium point. We will investigate this system by developing both an analytical and experimental model of the system and analyze the dynamic characteristics. In the process, we hope to answer questions regarding observability and controllability of the system. In addition, we will derive and implement a discrete-time Kalman filter to handle the inherent noise of the system and improve response.},
+}
+
 @Comment{jabref-meta: databaseType:bibtex;}

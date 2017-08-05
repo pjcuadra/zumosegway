@@ -57,6 +57,7 @@
 @Misc{Example,
   author = {Pololu},
   title  = {Zumolibrary's Balancing example code},
+  url    = {https://github.com/pololu/zumo-32u4-arduino-library/tree/master/examples/Balancing},
 }
 
 @Misc{motor50,
@@ -87,6 +88,11 @@
   author = {Pololu},
   title  = {100:1 Micro Metal Gearmotor HP 6V with Extended Motor Shaft},
   url    = {https://www.pololu.com/product/2214},
+}
+
+@TechReport{,
+  title    = {Modeling, Simulation and Fabrication of a Balancing Robot},
+  abstract = {A balancing robot is a common demonstration of controls in a dynamic system. Due to the inherent instability of the equilibrium point, appropriate controllability and observability measures must be undertaken to stabilize the system about the desired equilibrium point. We will investigate this system by developing both an analytical and experimental model of the system and analyze the dynamic characteristics. In the process, we hope to answer questions regarding observability and controllability of the system. In addition, we will derive and implement a discrete-time Kalman filter to handle the inherent noise of the system and improve response.},
 }
 
 @Comment{jabref-meta: databaseType:bibtex;}

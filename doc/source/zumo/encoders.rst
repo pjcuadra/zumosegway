@@ -114,3 +114,9 @@ our state variable model [here].
     respective motor and clear its counter.
   * :math:`motorAngularPosition` is the average of both speeds multiplied by
     :math:`-1` to match our reference frame.
+
+.. only:: html
+
+ .. bibliography:: ../_static/references.bib
+  :style: plain
+  :filter: docname in docnames

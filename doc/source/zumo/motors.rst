@@ -1,3 +1,5 @@
+.. _motors_title:
+
 Motors
 ------
 
@@ -42,7 +44,7 @@ of :math:`I_{max}` which corresponds to the Stall Current at 6V. Additionally,
 the torque of the motor is linearly related to the current is applied to it.
 Therefore, the torque of the motors can be calculated by;
 
-.. math:: \tau = \frac{\tau_s}{400} \times speed_{PWM}
+.. math:: \tau_0 = \frac{\tau_s}{400} \times speed_{PWM}
   :label: torque_relation
 
 Where :math:`\tau_s` is the stall torque of the motor at 6V. In our case we used
@@ -59,3 +61,9 @@ Where :math:`\tau_s` is the stall torque of the motor at 6V. In our case we used
     50:1     :math:`0.155354`                  :math:`400`                          :math:`1.6`
    100:1     :math:`0.211846`                  :math:`320`                          :math:`1.6`
   ========  ================================  ===================================  ================================
+
+.. only:: html
+
+ .. bibliography:: ../_static/references.bib
+  :style: plain
+  :filter: docname in docnames

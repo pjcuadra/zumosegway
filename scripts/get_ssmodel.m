@@ -3,7 +3,7 @@ function model = get_ssmodel()
   % Consants (context)
   load_physical_constants
   
-  E = [(I_ws + (m_w + m)*R^2) m*R*l;
+  E = [(I_w + (m_w + m)*R^2) m*R*l;
        m*R*l (I + m*l^2)];
        
   F = [(beta_gamma + beta_m) -beta_m;
