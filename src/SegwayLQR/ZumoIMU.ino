@@ -28,7 +28,7 @@ void setupIMU() {
   // High-pass filter disabled.
   gyro.writeReg(L3G::CTRL5, 0b00000000);
 
-    // Set up the LSM303D accelerometer.
+  // Set up the LSM303D accelerometer.
   compass.init();
 
   // 50 Hz output data rate
@@ -50,11 +50,12 @@ void sampleGyro() {
   lastUpdate = m;
 
   gyro.read();
+  // Obtain the angular speed out of the gyro. The gyro's 
+  // sensitivity is 0.07 dps per digit.
   gyroAngularSpeed = ((float)gyroOffsetY - (float)gyro.g.y) * 70 / 1000.0;
 
   // Calculate how much the angle has changed, in degrees, and
-  // add it to our estimation of the current angle.  The gyro's
-  // sensitivity is 0.07 dps per digit.
+  // add it to our estimation of the current angle.  
   angularPosition += gyroAngularSpeed * dt / 1000000.0;
 }
 
@@ -121,12 +122,5 @@ void calibrateGyro() {
   ledYellow(0);
 }
 
-void filterAngularPositionLP() {
-  const int degree = 5;
-  const float c[degree] = {1/5.0, 1/5.0, 1/5.0, 1/5.0, 1/5.0};
-  static float x[degree] = {0, 0, 0,0,0};
-
-  filterFIR(degree, c, x, angularPosition, angularPosition);
-}
 
 

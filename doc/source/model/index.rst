@@ -1,6 +1,10 @@
 Segway Model
 ============
 
+.. todo::
+
+  Rewrite this section with new model
+
 Physical Model
 --------------
 

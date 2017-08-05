@@ -1,21 +1,29 @@
-.. Zumo Segway documentation master file, created by
-   sphinx-quickstart on Mon May 29 17:49:16 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Zumo Segway's Documentation
+===========================
 
-Welcome to Zumo Segway's documentation!
-=======================================
+.. raw:: latex
 
-Contents:
+  \listoffigures
+  \listoftables
+
+.. todo::
+
+  Add list of listings
+
+.. todo::
+
+  Write abstract
 
 .. toctree::
    :maxdepth: 2
 
+   intro/index.rst
+   zumo/index.rst
    model/index.rst
+   todos.rst
 
-Indices and tables
-==================
+.. only:: latex
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+  .. bibliography:: _static/references.bib
+   :all:
+   :style: plain

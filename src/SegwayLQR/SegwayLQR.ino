@@ -83,7 +83,7 @@ void loop() {
   // accelerometer, print it, and set the motor speeds.
   static byte lastCorrectionTime = 0;
   byte m = millis();
-  if ((byte)(m - lastCorrectionTime) >= 10)
+  if ((byte)(m - lastCorrectionTime) >= 20)
   {
     lastCorrectionTime = m;
     sampleAccelerometer();
