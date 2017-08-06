@@ -40,3 +40,10 @@ As expected :cite:`mathworks_model` nor :cite:`main_paper` present a method to
 obtain accurate friction coefficients, what makes the model also inaccurate. But
 the inaccuracy of the model lead to unstable controlled system. Which showed the
 need of add a scale factor in the controlling law.
+
+.. only:: latex
+
+  The online version of this documentation can be seen at
+  http://zumosegway.readthedocs.io/en/latest/index.html and the source code
+  documented here is hosted as an opensource project on github at
+  https://github.com/pjcuadra/zumosegway.

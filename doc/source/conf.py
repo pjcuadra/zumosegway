@@ -11,7 +11,8 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
-
+import sys
+import os
 import sphinx_rtd_theme
 
 html_theme = "sphinx_rtd_theme"
@@ -40,6 +41,21 @@ extensions = [
     'sphinx.ext.graphviz',
     'sphinxcontrib.bibtex',
 ]
+
+# PYTHONPATH = docs/source
+DOC_SOURCES_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT_DIR = os.path.dirname(os.path.dirname(DOC_SOURCES_DIR))
+sys.path.insert(0, DOC_SOURCES_DIR)
+print('PROJECT_ROOT_DIR', PROJECT_ROOT_DIR)
+
+# If runs on ReadTheDocs environment
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
+# Hack for lacking git-lfs support ReadTheDocs
+if on_rtd:
+    print('Fetching files with git_lfs')
+    from git_lfs import fetch
+    fetch(PROJECT_ROOT_DIR)
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
