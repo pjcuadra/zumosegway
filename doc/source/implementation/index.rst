@@ -1,3 +1,5 @@
+.. _r-controller_imp:
+
 Controller Implementation
 =========================
 

@@ -1,3 +1,5 @@
+.. _r-lqr_desgin:
+
 LQR Controller Design
 =====================
 

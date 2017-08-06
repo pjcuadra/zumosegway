@@ -36,7 +36,7 @@
   url      = {https://www.pololu.com/file/0J703/LSM303D.pdf},
 }
 
-@Manual{STMicroelectronics2012a,
+@Manual{STMGYRO,
   title    = {L3GD20H, MEMS motion sensor: three-axis digital output gyroscope},
   author   = {STMicroelectronics},
   month    = jun,
@@ -99,11 +99,15 @@
 }
 
 @Misc{repo,
-  author = {Cuadra, Pedro Gardi, Meghadoot},
+  author = {Pedro Cuadra Meghadoot Gardi},
   title  = {pjcuadra/zumogetway},
   month  = aug,
   year   = {2017},
   url    = {https://github.com/pjcuadra/zumosegway},
+}
+
+@Misc{mathworks_model,
+  url = {http://ctms.engin.umich.edu/CTMS/index.php?example=InvertedPendulum&section=SystemModeling},
 }
 
 @Comment{jabref-meta: databaseType:bibtex;}

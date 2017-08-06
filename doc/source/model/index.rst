@@ -1,3 +1,5 @@
+.. _r-model:
+
 Segway Model
 ============
 

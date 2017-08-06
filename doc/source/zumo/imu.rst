@@ -29,17 +29,53 @@ Gyroscope
 
 We consider the following aspects of Gyroscope for *IMU* sensory-model;
 
-* Gyroscope provides the change in orientation of the zumo (Roll, Yaw, Pitch).
+* Gyroscope provides the change in orientation of the Zumo (Roll, Yaw, Pitch).
   Integration of result provides the position details.
 * *ST L3GD20H* Gyroscope operation is based on angular momentum.
+* *ST L3GD20H* provides;
+  * Selectable full-scale range of :math:`\pm245dps`/:math:`\pm500dps`/
+    :math:`\pm2000dps`, with the :math:`8.75mdps/digit`/:math:`17.5mdps/digit`/
+    :math:`70mdps/digit` sensitivity, respectively.
+  * Selectable data sampling rate.
+  * Low-Pass filter to reduce noise with selectable cut-off frequencies.
 
-.. todo::
 
-  Add gyroscope capabilities here.
+.. _gyro_config:
+.. code-block:: c
+  :caption: Gyroscope configuration :cite:`Example`
 
-.. todo::
+  // Set up the L3GD20H gyro.
+  gyro.init();
 
-  Add gyroscope initialization/configuration here
+  // 800 Hz output data rate,
+  // low-pass filter cutoff 100 Hz.
+  gyro.writeReg(L3G::CTRL1, 0b11111010);
+
+  // 2000 dps full scale.
+  gyro.writeReg(L3G::CTRL4, 0b00100000);
+
+  // High-pass filter disabled.
+  gyro.writeReg(L3G::CTRL5, 0b00000000);
+
+.. note::
+
+  All other register were left with their default value. Review :cite:`STMGYRO`
+  for more information regarding default values.
+
+A more detailed descriptions of the configuration used is shown below;
+
+  * :code:`L3G::CTRL1.DR[1:0] = 0x3` selects the :math:`800 Hz` data sampling
+    rate :cite:`STMGYRO`.
+  * :code:`L3G::CTRL1.BW[1:0] = 0x3` selects :math:`100 Hz` gyroscope data
+    cut-off frequency :cite:`STMGYRO`.
+  * :code:`L3G::CTRL1.PD = 0x1` selects the normal mode disabling power mode,
+    so the signal will be always be sampled :cite:`STMGYRO`.
+  * :code:`L3G::CTRL1.XEN = 0x0`, :code:`L3G::CTRL1.YEN = 0x1` and
+    :code:`L3G::CTRL1.ZEN = 0x0` enables only the needed gyroscope channel.
+  * :code:`L3G::CTRL4.FS[1:0] = 0x2` selects the full-scale of
+    :math:`\pm2000dps` with a sensitivity of :math:`70mdps/digit`
+    :cite:`STMGYRO`.
+  * :code:`L3G::CTRL5.HPen = 0x0` disable the High-Pass filter :cite:`STMGYRO`.
 
 Accelerometer
 +++++++++++++

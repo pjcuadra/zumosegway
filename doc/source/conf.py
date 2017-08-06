@@ -221,7 +221,10 @@ latex_elements = {
     # 'pointsize': '10pt',
 
     # Additional stuff for the LaTeX preamble.
-    # 'preamble': '',
+    'preamble': r'''
+        \usepackage{listings}
+        ''',
+
 
     # Latex figure (float) alignment
     # 'figure_align': 'htbp',

@@ -6,13 +6,6 @@ Zumo Segway's Documentation
   \listoffigures
   \listoftables
 
-.. todo::
-
-  Add list of listings
-
-.. todo::
-
-  Write abstract
 
 .. toctree::
    :maxdepth: 2
@@ -22,7 +15,6 @@ Zumo Segway's Documentation
    model/index.rst
    lqr/index.rst
    implementation/index.rst
-   todos.rst
 
 .. only:: latex
 

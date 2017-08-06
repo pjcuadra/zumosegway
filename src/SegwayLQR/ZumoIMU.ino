@@ -20,7 +20,7 @@ void setupIMU() {
 
   // 800 Hz output data rate,
   // low-pass filter cutoff 100 Hz.
-  gyro.writeReg(L3G::CTRL1, 0b11111111);
+  gyro.writeReg(L3G::CTRL1, 0b11111010);
 
   // 2000 dps full scale.
   gyro.writeReg(L3G::CTRL4, 0b00100000);
