@@ -34,8 +34,9 @@ We consider the following aspects of Gyroscope for *IMU* sensory-model;
 * *ST L3GD20H* Gyroscope operation is based on angular momentum.
 * *ST L3GD20H* provides;
   * Selectable full-scale range of :math:`\pm245dps`/:math:`\pm500dps`/
-    :math:`\pm2000dps`, with the :math:`8.75mdps/digit`/:math:`17.5mdps/digit`/
-    :math:`70mdps/digit` sensitivity, respectively.
+    :math:`\pm2000dps`, with the :math:`8.75\frac{mdps}{digit}`/
+    :math:`17.5\frac{mdps}{digit}`/:math:`70\frac{mdps}{digit}` sensitivity,
+    respectively.
   * Selectable data sampling rate.
   * Low-Pass filter to reduce noise with selectable cut-off frequencies.
 

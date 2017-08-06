@@ -263,7 +263,7 @@ LQR Details
     compensate;
 
     * Possible deviation of the actual Stall Torque with load.
-    * Bad estimation of the :math:`\beta_m` and :math:`\beta_gamma` values.
+    * Bad estimation of the :math:`\beta_m` and :math:`\beta_\gamma` values.
 
 
 

@@ -78,7 +78,7 @@ All the parameters needed for the model can be seen in :numref:`constants`
 
 
 .. note::
-  For :math:`\beta_m` and :math:`\beta_gamma` are set to a dummy value as in
+  For :math:`\beta_m` and :math:`\beta_\gamma` are set to a dummy value as in
   :cite:`main_paper`.
 
 Model
