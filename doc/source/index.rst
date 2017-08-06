@@ -20,6 +20,8 @@ Zumo Segway's Documentation
    intro/index.rst
    zumo/index.rst
    model/index.rst
+   lqr/index.rst
+   implementation/index.rst
    todos.rst
 
 .. only:: latex

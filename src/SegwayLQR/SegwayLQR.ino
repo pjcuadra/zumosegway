@@ -87,7 +87,6 @@ void loop() {
   {
     lastCorrectionTime = m;
     sampleAccelerometer();
-//    filterAngularPositionLP();
     sampleEncoders();
     setActuators();
   }

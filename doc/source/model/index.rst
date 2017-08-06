@@ -7,6 +7,7 @@ the physical description of :numref:`model_image`.
 .. _model_image:
 .. figure:: ../_static/model_image.png
   :align: center
+  :width: 200px
 
   Segway's relevant parameters :cite:`main_paper`
 
@@ -91,8 +92,9 @@ define as in :numref:`com_fig`.
 .. _com_fig:
 .. figure:: ../_static/com_image.png
   :align: center
+  :width: 200px
 
-  Center of Mass calculation
+  Center of Mass calculation :cite:`main_paper`
 
 Similarly :cite:`main_paper` defines the inertia momentum of the robot as in
 :eq:`inertial_mom`.
@@ -166,6 +168,9 @@ With;
 .. math::
   H_1 = H * \frac{\tau_s}{400}
 
+
+.. _r-state-var-model:
+
 State Variable Model
 --------------------
 
@@ -191,4 +196,47 @@ With the state variable vector;
 
 And the constant matrices;
 
-.. todo:: Add all matricies here
+.. math::
+  A = \left[
+  \begin{array}{c|c|cc}
+    \begin{matrix} 0 \\ 0 \end{matrix} & \begin{matrix} 0 \\ 0 \end{matrix}  & \begin{matrix} 1 & 0 \\ 0 & 1 \end{matrix} \\
+    \hline
+    \begin{matrix} 0 \\ 0 \end{matrix} & -E^{-1}G & -E^{-1}F
+  \end{array}
+  \right]
+
+
+.. math::
+  B = \left[
+  \begin{array}{c}
+    \begin{matrix} 0 \\ 0 \end{matrix} \\
+    \hline
+    -E^{-1}H
+  \end{array}
+  \right]
+
+.. math::
+
+  C = \begin{bmatrix}
+    1 & 0 & 0 & 0 \\
+    0 & 1 & 0 & 0 \\
+    0 & 0 & 1 & 0 \\
+    0 & 0 & 0 & 1
+  \end{bmatrix}
+
+.. math::
+
+  D =  \begin{bmatrix}
+    0 \\
+    0 \\
+    0 \\
+    0
+  \end{bmatrix}
+
+
+
+.. only:: html
+
+ .. bibliography:: ../_static/references.bib
+  :style: plain
+  :filter: docname in docnames

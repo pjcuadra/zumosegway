@@ -1,14 +1,12 @@
+.. _r-encoders:
+
 Encoders
 --------
 
 The Zumo32U4 includes on-board encoders for closed-loop motor control. In our
 application we need to read the angular position and angular speed of the motors
 because to the Segway model we used defines these quantities as state variables.
-Review the state variable model here.
-
-.. todo::
-
-  Add reference to state variable model.
+For more information review the :ref:`State Variable Model <r-state-var-model>`.
 
 The optical encoder :cite:`encoder` available in the Zumo32u4 uses the *Sharp GP2S60*
 :cite:`Sharp2005`. In the case of the encoders the Zumo Library
@@ -60,12 +58,8 @@ With;
 
 :numref:`encoders_code` shows the implementation of the explained above. Note
 that the :math:`motorAngularSpeed` is obtained by derivating
-:math:`motorAngularPosition` both are needed by our state variable model. Review
-our state variable model [here].
-
-.. todo::
-
-  Add state variable model reference here
+:math:`motorAngularPosition` both are needed by our state variable model. For
+more information review the :ref:`State Variable Model <r-state-var-model>`.
 
 .. _encoders_code:
 .. code-block:: c
@@ -114,6 +108,38 @@ our state variable model [here].
     respective motor and clear its counter.
   * :math:`motorAngularPosition` is the average of both speeds multiplied by
     :math:`-1` to match our reference frame.
+  * The source code of the Encoders can be reviewed at
+    `src/SegwayLQR/ZumoEncoders.ino <https://github.com/pjcuadra/zumosegway/blob/master/src/SegwayLQR/ZumoEncoders.ino>`_
+
+
+ZumoEncoders API
+++++++++++++++++
+
+.. cpp:class:: ZumoEncoders
+
+  .. cpp:var:: const float gearRatio = 100.37
+
+    Zumo 100:1 motor gear ratio
+
+  .. cpp:var:: const float countToDegrees = 360 / (float)(12.0 * gearRatio);
+
+    Encoder count to cycle convertion constant
+
+
+  .. cpp:var:: Zumo32U4Encoders encoders
+
+    Zumo encoders
+
+
+  .. cpp:function:: void clearEncoders()
+
+    Clear the counters of the encoder
+
+
+  .. cpp:function:: void sampleEncoders()
+
+    Sample the encoders
+
 
 .. only:: html
 

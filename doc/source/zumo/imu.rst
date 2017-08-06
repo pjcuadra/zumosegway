@@ -1,3 +1,5 @@
+.. _r-imu:
+
 Inertial Management Unit
 ------------------------
 
@@ -188,24 +190,65 @@ how the correction is performed.
 
   }
 
-
 .. note::
   * Note that :code:`angularPosition` is derivated to get :code:`angularSpeed`,
-    because both quantities are needed by the state variable model used. Review
-    the state variable model here.
+    because both quantities are needed by the state variable model used. For
+    more information review the :ref:`State Variable Model <r-state-var-model>`.
   * The sign of the angle has been changed from the one in the original
     balancing example :cite:`Example` to match our reference framework.
-
-.. todo::
-
-  Add reference to state variable model
+  * `src/SegwayLQR/ZumoIMU.ino <https://github.com/pjcuadra/zumosegway/blob/master/src/SegwayLQR/ZumoIMU.ino>`_
+    holds the source code that handles the IMU.
 
 .. warning::
   All angles are given in degrees because during implementation it was proved
   that it was easier to catch bugs if the angle was in degrees. One reason for
   this was that degrees are scaled up with respect with radians it was easier
   to catch integer divisions causing the angle to be zero. Furthermore the use
-  of degrees is a little more intuitive than radians. 
+  of degrees is a little more intuitive than radians.
+
+
+ZumoIMU API
++++++++++++
+
+.. cpp:class:: ZumoIMU
+
+  .. cpp:var:: float accelerometerAngle = 0
+
+    Accelerometer angle
+
+  .. cpp:var:: L3G gyro
+
+    Zumo's Gyro
+
+  .. cpp:var:: LSM303 compass
+
+    Zumo'ss Accelerometer
+
+  .. cpp:var:: float gyroOffsetY
+
+    Gyro's bias
+
+  .. cpp:var:: float prevAngularPosition = 0
+
+    Previous Angular position
+
+
+  .. cpp:function:: void setupIMU()
+
+    Setup the Gyro and Accelerometer
+
+  .. cpp:function:: void sampleGyro()
+
+    Reads the Gyro changing rate and integrate it adding it to the angle
+
+  .. cpp:function:: void sampleAccelerometer()
+
+    Read the accelerometer and adjust the angle
+
+  .. cpp:function:: void calibrateGyro()
+
+    Calibrate the Gyroscope. Get the bias.
+
 
 .. only:: html
 

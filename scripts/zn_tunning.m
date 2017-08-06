@@ -2,6 +2,8 @@ clear;
 clc;
 close all;
 
+load_physical_constants
+
 % Measurements
 oscilations_count = 3; % From simulation 40ms
 measured_samples = 50;
@@ -30,7 +32,7 @@ K_p = 0.6 * K0;
 K_i = 2 * K_p * f0;
 K_d = T0 * K_p  / 8;
 
-pid_c = pid(K_p, K_i, K_d)
+pid_c = pid(K_p, K_i, K_d) / pulse2torque;
 
 subplot(plots_row, plots_col, 1);
 impulse(feedback(pid_c*plant, -1))
